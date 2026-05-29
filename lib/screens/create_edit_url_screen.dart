@@ -4,6 +4,7 @@ import '../entities/nano_url.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
+import '../helpers/glyph_helper.dart';
 
 class CreateEditUrlScreen extends StatefulWidget {
   const CreateEditUrlScreen({super.key});
@@ -41,14 +42,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
   bool? _aliasAvailable;
   String? _aliasFeedbackText;
 
-  final List<String> _availableGlyphs = [
-    "link", "star", "favorite", "home", "work",
-    "shopping_cart", "rocket_launch", "bolt", "mail", "person",
-    "verified", "lock", "schedule", "group", "photo_camera",
-    "music_note", "flight", "restaurant", "school", "code",
-    "search", "settings", "notifications", "share", "delete",
-    "edit", "check_circle", "warning", "info", "help"
-  ];
+  // Available glyphs loaded via GlyphHelper.availableGlyphs
 
   @override
   void didChangeDependencies() {
@@ -83,41 +77,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
     super.dispose();
   }
 
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'link': return Icons.link;
-      case 'star': return Icons.star;
-      case 'favorite': return Icons.favorite;
-      case 'home': return Icons.home;
-      case 'work': return Icons.work;
-      case 'shopping_cart': return Icons.shopping_cart;
-      case 'rocket_launch': return Icons.rocket_launch;
-      case 'bolt': return Icons.bolt;
-      case 'mail': return Icons.mail;
-      case 'person': return Icons.person;
-      case 'verified': return Icons.verified;
-      case 'lock': return Icons.lock;
-      case 'schedule': return Icons.schedule;
-      case 'group': return Icons.group;
-      case 'photo_camera': return Icons.photo_camera;
-      case 'music_note': return Icons.music_note;
-      case 'flight': return Icons.flight;
-      case 'restaurant': return Icons.restaurant;
-      case 'school': return Icons.school;
-      case 'code': return Icons.code;
-      case 'search': return Icons.search;
-      case 'settings': return Icons.settings;
-      case 'notifications': return Icons.notifications;
-      case 'share': return Icons.share;
-      case 'delete': return Icons.delete;
-      case 'edit': return Icons.edit;
-      case 'check_circle': return Icons.check_circle;
-      case 'warning': return Icons.warning;
-      case 'info': return Icons.info;
-      case 'help': return Icons.help;
-      default: return Icons.link;
-    }
-  }
+  // Redundant _getIconData method replaced by GlyphHelper.getIconData
 
   // Debounced check for short URL availability
   void _onShortUrlChanged(String value) {
@@ -399,7 +359,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                   ),
                                 ),
                                 child: Icon(
-                                  _getIconData(_selectedGlyph),
+                                  GlyphHelper.getIconData(_selectedGlyph),
                                   color: AppColors.primary,
                                   size: 36.0,
                                 ),
@@ -438,9 +398,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                 crossAxisSpacing: 8,
                                 mainAxisSpacing: 8,
                               ),
-                              itemCount: _availableGlyphs.length,
+                              itemCount: GlyphHelper.availableGlyphs.length,
                               itemBuilder: (context, index) {
-                                final glyphName = _availableGlyphs[index];
+                                final glyphName = GlyphHelper.availableGlyphs[index];
                                 final isSelected = _selectedGlyph == glyphName;
                                 return InkWell(
                                   onTap: () {
@@ -462,7 +422,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                       ),
                                     ),
                                     child: Icon(
-                                      _getIconData(glyphName),
+                                      GlyphHelper.getIconData(glyphName),
                                       color: isSelected ? AppColors.primary : AppColors.textMuted,
                                       size: 20,
                                     ),

@@ -6,6 +6,7 @@ import '../components/qr_code_dialog.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
+import '../helpers/glyph_helper.dart';
 
 // Main Dashboard screen for NanoUrls containing URL creation and managing
 class HomeScreen extends StatefulWidget {
@@ -21,7 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late List<NanoUrl> _urls = [];
   String _searchQuery = '';
-  String _selectedGlyphFilter = 'todos'; // 'todos', 'link', 'bolt', 'security', 'lock'
+  String _selectedGlyphFilter = 'todos'; // 'todos' or any specific glyph
+  bool _filterPasswordOnly = false;
+  bool _isCompactViewMode = false;
   bool _showTrashOnly = false;
   bool _isLoading = false;
   String? _apiError;
@@ -355,9 +358,17 @@ class _HomeScreenState extends State<HomeScreen> {
           url.description.toLowerCase().contains(_searchQuery.toLowerCase());
       if (!matchQuery) return false;
 
-      if (_selectedGlyphFilter == 'todos') return true;
-      if (_selectedGlyphFilter == 'lock') return url.hasPassword;
-      return url.glyph?.toLowerCase() == _selectedGlyphFilter;
+      // Filter by password protection toggle separately
+      if (_filterPasswordOnly && !url.hasPassword) return false;
+
+      // Filter by selected glyph from the dropdown
+      if (_selectedGlyphFilter != 'todos') {
+        if (url.glyph?.toLowerCase() != _selectedGlyphFilter.toLowerCase()) {
+          return false;
+        }
+      }
+
+      return true;
     }).toList();
   }
 
@@ -391,24 +402,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          // View Mode Button
+          IconButton(
+            icon: Icon(
+              _isCompactViewMode ? Icons.view_stream : Icons.view_list,
+              color: AppColors.primary,
+            ),
+            tooltip: _isCompactViewMode ? 'Visualização completa' : 'Visualização compacta',
+            onPressed: () {
+              setState(() {
+                _isCompactViewMode = !_isCompactViewMode;
+              });
+            },
+          ),
           // Refresh Button
           if (_sessionManager.isAuthenticated)
             IconButton(
               icon: const Icon(Icons.refresh, color: AppColors.primary),
               onPressed: _loadDashboardData,
             ),
-          // Account Profile circle button (Logs out)
+          // Logout button styled matching card mode & refresh
           IconButton(
-            icon: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white.withOpacity(0.1)),
-              ),
-              child: const Icon(Icons.logout, size: 16, color: Colors.white70),
-            ),
+            icon: const Icon(Icons.logout, color: AppColors.primary),
+            tooltip: 'Sair',
             onPressed: () {
               _sessionManager.clearSession();
               Navigator.of(context).pushReplacementNamed('/login');
@@ -514,19 +530,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16.0),
 
-                    // Horizontal Category Pills
-                    SizedBox(
-                      height: 38.0,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _buildCategoryPill('Todos', 'todos', Icons.grid_view),
-                          _buildCategoryPill('Gerais', 'link', Icons.link),
-                          _buildCategoryPill('Rápidos', 'bolt', Icons.bolt),
-                          _buildCategoryPill('Seguros', 'security', Icons.security),
-                          _buildCategoryPill('Protegidos', 'lock', Icons.lock),
-                        ],
-                      ),
+                    // Filter Controls: Dropdown and Password Protection Toggle
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildGlyphDropdown(),
+                        ),
+                        const SizedBox(width: 12.0),
+                        _buildPasswordToggle(),
+                      ],
                     ),
                     const SizedBox(height: 16.0),
                   ],
@@ -598,6 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return UrlCard(
                         key: ValueKey(item.shortUrl),
                         url: item,
+                        isCompact: _isCompactViewMode,
                         onDetails: () {
                           Navigator.pushNamed(
                             context,
@@ -680,41 +693,114 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategoryPill(String title, String value, IconData icon) {
-    final isSelected = _selectedGlyphFilter == value;
+  Widget _buildGlyphDropdown() {
     return Container(
-      margin: const EdgeInsets.only(right: 8.0),
-      child: ChoiceChip(
-        avatar: Icon(
-          icon,
-          size: 16.0,
-          color: isSelected ? AppColors.textLight : AppColors.textMuted,
+      height: 48.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: AppColors.border, width: 1.0),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedGlyphFilter,
+          dropdownColor: AppColors.surface,
+          icon: const Icon(Icons.arrow_drop_down, color: AppColors.textMuted),
+          isExpanded: true,
+          onChanged: (String? newValue) {
+            if (newValue != null) {
+              setState(() {
+                _selectedGlyphFilter = newValue;
+              });
+            }
+          },
+          items: [
+            DropdownMenuItem<String>(
+              value: 'todos',
+              child: Row(
+                children: [
+                  const Icon(Icons.grid_view, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    'Todos os ícones',
+                    style: TextStyle(
+                      color: _selectedGlyphFilter == 'todos' ? AppColors.primary : Colors.white70,
+                      fontSize: 14.0,
+                      fontFamily: 'SplineSans',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ...GlyphHelper.availableGlyphs.map((String glyph) {
+              final icon = GlyphHelper.getIconData(glyph);
+              final displayName = glyph[0].toUpperCase() + glyph.substring(1).replaceAll('_', ' ');
+              final isSelected = _selectedGlyphFilter == glyph;
+              return DropdownMenuItem<String>(
+                value: glyph,
+                child: Row(
+                  children: [
+                    Icon(icon, color: isSelected ? AppColors.primary : AppColors.textMuted, size: 18),
+                    const SizedBox(width: 8.0),
+                    Text(
+                      displayName,
+                      style: TextStyle(
+                        color: isSelected ? AppColors.primary : Colors.white70,
+                        fontSize: 14.0,
+                        fontFamily: 'SplineSans',
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
         ),
-        label: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? AppColors.textLight : Colors.white70,
-            fontSize: 13.0,
-            fontFamily: 'SplineSans',
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        selected: isSelected,
-        selectedColor: AppColors.primary,
-        backgroundColor: AppColors.surface,
-        onSelected: (bool selected) {
-          setState(() {
-            _selectedGlyphFilter = selected ? value : 'todos';
-          });
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(999),
-          side: BorderSide(
+      ),
+    );
+  }
+
+  Widget _buildPasswordToggle() {
+    final isSelected = _filterPasswordOnly;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _filterPasswordOnly = !_filterPasswordOnly;
+        });
+      },
+      borderRadius: BorderRadius.circular(12.0),
+      child: Container(
+        height: 48.0,
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
             width: 1.0,
           ),
         ),
-        showCheckmark: false,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? Icons.lock : Icons.lock_open,
+              color: isSelected ? AppColors.primary : AppColors.textMuted,
+              size: 18.0,
+            ),
+            const SizedBox(width: 8.0),
+            Text(
+              'Protegidos',
+              style: TextStyle(
+                color: isSelected ? AppColors.primary : Colors.white70,
+                fontSize: 14.0,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontFamily: 'SplineSans',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
