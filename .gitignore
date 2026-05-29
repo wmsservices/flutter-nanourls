@@ -44,5 +44,5 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-#Custom App Ignores
-/lib/settings/crypto_settings.dart
+# Ignora o arquivo não importa em qual pasta ele esteja
+**/crypto_settings.dart
