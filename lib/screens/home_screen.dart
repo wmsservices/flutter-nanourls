@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../entities/nano_url.dart';
 import '../components/url_card.dart';
 import '../components/qr_code_dialog.dart';
@@ -35,7 +36,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadViewModePreference();
     _loadDashboardData();
+  }
+
+  Future<void> _loadViewModePreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final isCompact = prefs.getBool('is_compact_view') ?? false;
+      setState(() {
+        _isCompactViewMode = isCompact;
+      });
+    } catch (_) {
+      // Preferences error
+    }
   }
 
   // Load URLs from the API
@@ -54,6 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final list = await _apiService.fetchUserUrls();
       int urlsLeft = _urlsLeft;
       int analyticsLeft = _analyticsLeft;
+
+      try {
+        final updatedUser = await _apiService.fetchCurrentUser();
+        _sessionManager.saveSession(_sessionManager.token!, updatedUser);
+      } catch (_) {}
 
       try {
         urlsLeft = await _apiService.fetchNanoUrlsLeft();
@@ -104,7 +123,22 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  bool _checkUserEnabled() {
+    final user = _sessionManager.currentUser;
+    if (user != null && !user.enabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sua conta está desativada. Confirme seu e-mail para habilitá-la.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
   Future<void> _openCreateScreen() async {
+    if (!_checkUserEnabled()) return;
     final result = await Navigator.pushNamed(context, '/create-edit');
     if (result is NanoUrl) {
       _addNewShortenedUrl(result);
@@ -120,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Triggers screen to edit metadata of a link using route navigation
   Future<void> _editUrl(NanoUrl url) async {
+    if (!_checkUserEnabled()) return;
     final result = await Navigator.pushNamed(
       context,
       '/create-edit',
@@ -144,6 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Deletes URL permanently or sends it to trash using API
   Future<void> _deleteUrl(NanoUrl url) async {
+    if (!_checkUserEnabled()) return;
     final isAuthenticated = _sessionManager.isAuthenticated;
 
     if (url.enabled) {
@@ -284,6 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Restores items from trash to active state using API
   Future<void> _restoreUrl(NanoUrl url) async {
+    if (!_checkUserEnabled()) return;
     final isAuthenticated = _sessionManager.isAuthenticated;
 
     try {
@@ -409,12 +446,27 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.primary,
             ),
             tooltip: _isCompactViewMode ? 'Visualização completa' : 'Visualização compacta',
-            onPressed: () {
+            onPressed: () async {
               setState(() {
                 _isCompactViewMode = !_isCompactViewMode;
               });
+              try {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('is_compact_view', _isCompactViewMode);
+              } catch (_) {
+                // Preferences write error
+              }
             },
           ),
+          // Account Button
+          if (_sessionManager.isAuthenticated)
+            IconButton(
+              icon: const Icon(Icons.manage_accounts, color: AppColors.primary),
+              tooltip: 'Minha Conta',
+              onPressed: () {
+                Navigator.of(context).pushNamed('/account');
+              },
+            ),
           // Refresh Button
           if (_sessionManager.isAuthenticated)
             IconButton(
@@ -432,13 +484,48 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadDashboardData,
-        color: AppColors.primary,
-        backgroundColor: AppColors.surface,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
+      body: Column(
+        children: [
+          if (_sessionManager.currentUser?.enabled == false)
+            Container(
+              width: double.infinity,
+              color: Colors.amber[900]!.withOpacity(0.9),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Por favor, confirme seu e-mail para ativar sua conta e liberar todas as funções. Toque em Atualizar após confirmar.',
+                      style: TextStyle(color: Colors.white, fontSize: 13.0, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: _loadDashboardData,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: const Text(
+                      'Atualizar',
+                      style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadDashboardData,
+              color: AppColors.primary,
+              backgroundColor: AppColors.surface,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
             // Search Field & Filter Header
             SliverToBoxAdapter(
               child: Padding(
@@ -446,24 +533,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text.rich(
-                      TextSpan(
-                        text: 'Minhas ',
-                        style: const TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'NanoUrls',
-                            style: TextStyle(
-                              color: AppColors.primary,
+                    _showTrashOnly
+                        ? Text.rich(
+                            const TextSpan(
+                              text: 'Modo ',
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Lixeira',
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Text.rich(
+                            TextSpan(
+                              text: 'Minhas ',
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'NanoUrls',
+                                  style: TextStyle(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
                     const SizedBox(height: 16.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -646,6 +752,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    ),
+  ],
+),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textLight,

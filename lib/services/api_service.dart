@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../entities/user.dart';
 import '../entities/nano_url.dart';
+import '../entities/plan.dart';
 import '../dtos/dashboard_data_dto.dart';
 import 'session_manager.dart';
 import 'crypto_service.dart';
@@ -27,18 +28,25 @@ class ApiService {
     }
   }
 
-  // Fetches the client's public IPv4 address from ipify
+  static String? _cachedIp;
+
+  // Fetches the client's public IPv4 address from ipify using non-blocking background fetch
   Future<String> _getClientIp() async {
-    try {
-      final response = await http.get(Uri.parse('https://api.ipify.org'))
-          .timeout(const Duration(seconds: 3));
-      if (response.statusCode == 200) {
-        return response.body.trim();
-      }
-    } catch (_) {
-      // Fallback
-    }
+    if (_cachedIp != null) return _cachedIp!;
+    _fetchIpInBackground();
     return '127.0.0.1';
+  }
+
+  void _fetchIpInBackground() {
+    http.get(Uri.parse('https://api.ipify.org'))
+        .timeout(const Duration(seconds: 3))
+        .then((response) {
+          if (response.statusCode == 200) {
+            _cachedIp = response.body.trim();
+          }
+        }).catchError((_) {
+          // Silent fallback
+        });
   }
 
   // Executes Sign-In POST request to /v1/user/signin with robust body and exception parsing
@@ -93,10 +101,10 @@ class ApiService {
         return user;
       } else if (response.statusCode == 401) {
         // Retrieve backend message or default to credentials error
-        final errorMessage = responseBody?['message'] ?? 'Credenciais inválidas.';
+        final errorMessage = _extractMessage(responseBody?['message'], 'Credenciais inválidas.');
         throw HttpException(errorMessage);
       } else {
-        final errorMessage = responseBody?['message'] ?? 'Serviço temporariamente indisponível.';
+        final errorMessage = _extractMessage(responseBody?['message'], 'Serviço temporariamente indisponível.');
         throw HttpException(errorMessage);
       }
     } on SocketException {
@@ -443,12 +451,227 @@ class ApiService {
     }
   }
 
+  // Fetches current User details
+  Future<User> fetchCurrentUser() async {
+    final token = _sessionManager.token;
+    if (token == null) {
+      throw const HttpException('Não autorizado. Token de sessão não encontrado.');
+    }
+
+    final url = Uri.parse('$_baseUrl/v1/user/get-by-id');
+    final locale = _getLocaleHeader();
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Accept-Language': locale,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return User.fromJson(data);
+      } else {
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    } on FormatException {
+      throw const HttpException('Erro de formato na resposta do servidor.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
+  // Fetches Plan details by ID
+  Future<Plan> fetchPlanById(int planId) async {
+    final token = _sessionManager.token;
+    if (token == null) {
+      throw const HttpException('Não autorizado. Token de sessão não encontrado.');
+    }
+
+    final url = Uri.parse('$_baseUrl/v1/plan/get-by-id/$planId');
+    final locale = _getLocaleHeader();
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Accept-Language': locale,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Plan.fromJson(data);
+      } else {
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    } on FormatException {
+      throw const HttpException('Erro de formato na resposta do servidor.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
+  // Updates User Personal Data (username or email)
+  Future<User> updatePersonalData({String? userName, String? email}) async {
+    final token = _sessionManager.token;
+    if (token == null) {
+      throw const HttpException('Não autorizado. Token de sessão não encontrado.');
+    }
+
+    final url = Uri.parse('$_baseUrl/v1/user/personal-data');
+    final locale = _getLocaleHeader();
+
+    final Map<String, dynamic> body = {};
+    if (userName != null) {
+      body['userName'] = userName;
+    }
+    if (email != null) {
+      body['email'] = _cryptoService.encryptEmail(email);
+    }
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Accept-Language': locale,
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newToken = data['token'] as String;
+        final userJson = data['user'] as Map<String, dynamic>;
+        final updatedUser = User.fromJson(userJson);
+
+        _sessionManager.saveSession(newToken, updatedUser);
+        return updatedUser;
+      } else {
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    } on FormatException {
+      throw const HttpException('Erro de formato na resposta do servidor.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
+  // Changes User Password
+  Future<User> changePassword(String newPassword) async {
+    final token = _sessionManager.token;
+    if (token == null) {
+      throw const HttpException('Não autorizado. Token de sessão não encontrado.');
+    }
+
+    final url = Uri.parse('$_baseUrl/v1/user/personal-data');
+    final locale = _getLocaleHeader();
+
+    final Map<String, dynamic> body = {
+      'password': _cryptoService.encryptPassword(newPassword)
+    };
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Accept-Language': locale,
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newToken = data['token'] as String;
+        final userJson = data['user'] as Map<String, dynamic>;
+        final updatedUser = User.fromJson(userJson);
+
+        _sessionManager.saveSession(newToken, updatedUser);
+        return updatedUser;
+      } else {
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    } on FormatException {
+      throw const HttpException('Erro de formato na resposta do servidor.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
+  // Deletes User Account permanently
+  Future<void> deleteAccount() async {
+    final token = _sessionManager.token;
+    if (token == null) {
+      throw const HttpException('Não autorizado. Token de sessão não encontrado.');
+    }
+
+    final url = Uri.parse('$_baseUrl/v1/user/delete-account');
+    final locale = _getLocaleHeader();
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Authorization': 'Bearer $token',
+          'Accept-Language': locale,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        _sessionManager.clearSession();
+      } else {
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
+  String _extractMessage(dynamic messageObj, String defaultMessage) {
+    if (messageObj == null) return defaultMessage;
+    if (messageObj is String) return messageObj;
+    if (messageObj is Map) {
+      final value = messageObj['value'];
+      if (value is String) return value;
+      final name = messageObj['name'];
+      if (name is String) return name;
+    }
+    return messageObj.toString();
+  }
+
   // Safe helper to extract error messages from HTTP responses
   String _parseError(http.Response response) {
     try {
       if (response.body.isNotEmpty) {
         final data = jsonDecode(response.body);
-        return data['message'] ?? response.body;
+        return _extractMessage(data['message'], response.body);
       }
     } catch (_) {}
     return 'Erro no servidor (Status: ${response.statusCode})';

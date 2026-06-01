@@ -1,19 +1,30 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
 
-class QrCodeDialog extends StatelessWidget {
+class QrCodeDialog extends StatefulWidget {
   final NanoUrl url;
 
   const QrCodeDialog({super.key, required this.url});
 
+  @override
+  State<QrCodeDialog> createState() => _QrCodeDialogState();
+}
+
+class _QrCodeDialogState extends State<QrCodeDialog> {
+  bool _isSharing = false;
+
   void _copyToClipboard(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
-    Clipboard.setData(ClipboardData(text: url.goLink)).then((_) {
+    Clipboard.setData(ClipboardData(text: widget.url.goLink)).then((_) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Link copiado: ${url.goLink}'),
+          content: Text('Link copiado: ${widget.url.goLink}'),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 1),
         ),
@@ -21,11 +32,57 @@ class QrCodeDialog extends StatelessWidget {
     });
   }
 
+  Future<void> _shareQrCode() async {
+    setState(() {
+      _isSharing = true;
+    });
+
+    final String qrCodeUrl = widget.url.qrCodePngUrl?.isNotEmpty == true
+        ? widget.url.qrCodePngUrl!
+        : 'https://api.nanourls.com/v1/nano/qr/${widget.url.shortUrl}';
+
+    try {
+      final response = await http.get(Uri.parse(qrCodeUrl));
+      if (response.statusCode == 200) {
+        final tempDir = await getTemporaryDirectory();
+        final file = await File('${tempDir.path}/qrcode_${widget.url.shortUrl}.png').create();
+        await file.writeAsBytes(response.bodyBytes);
+
+        final box = context.findRenderObject() as RenderBox?;
+        final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+
+        await SharePlus.instance.share(
+          ShareParams(
+            text: 'QR Code para a NanoUrl: ${widget.url.shortUrl}',
+            files: [XFile(file.path)],
+            sharePositionOrigin: rect,
+          ),
+        );
+      } else {
+        throw 'Falha ao baixar imagem do QR Code.';
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao compartilhar QR Code: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSharing = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String qrCodeUrl = url.qrCodePngUrl?.isNotEmpty == true
-        ? url.qrCodePngUrl!
-        : 'https://api.nanourls.com/v1/nano/qr/${url.shortUrl}';
+    final String qrCodeUrl = widget.url.qrCodePngUrl?.isNotEmpty == true
+        ? widget.url.qrCodePngUrl!
+        : 'https://api.nanourls.com/v1/nano/qr/${widget.url.shortUrl}';
 
     return Dialog(
       backgroundColor: AppColors.surface,
@@ -97,12 +154,6 @@ class QrCodeDialog extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.broken_image_outlined, color: Colors.grey, size: 48),
-                          SizedBox(height: 8.0),
-                          Text(
-                            'Erro ao carregar QR Code',
-                            style: TextStyle(color: Colors.grey, fontSize: 12.0),
-                            textAlign: TextAlign.center,
-                          ),
                         ],
                       ),
                     );
@@ -116,7 +167,7 @@ class QrCodeDialog extends StatelessWidget {
             GestureDetector(
               onTap: () => _copyToClipboard(context),
               child: Text(
-                url.shortUrl,
+                widget.url.shortUrl,
                 style: const TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.bold,
@@ -129,6 +180,45 @@ class QrCodeDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24.0),
+
+            // Share Button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _isSharing ? null : _shareQrCode,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textLight,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: _isSharing
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textLight,
+                        ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Theme.of(context).platform == TargetPlatform.iOS
+                                ? Icons.ios_share
+                                : Icons.share,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          const Text('Compartilhar'),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12.0),
 
             // Close Button
             SizedBox(

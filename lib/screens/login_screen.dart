@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/crypto_service.dart';
 import '../theme/app_theme.dart';
 
 // Login screen to authenticate users with backend API signin integrations
@@ -19,13 +21,43 @@ class _LoginScreenState extends State<LoginScreen> {
   
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _rememberMe = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final remember = prefs.getBool('remember_me') ?? false;
+      if (remember) {
+        final encryptedEmail = prefs.getString('saved_email');
+        final encryptedPassword = prefs.getString('saved_password');
+        if (encryptedEmail != null && encryptedPassword != null) {
+          final crypto = CryptoService();
+          final email = crypto.decryptEmail(encryptedEmail);
+          final password = crypto.decryptPassword(encryptedPassword);
+          setState(() {
+            _rememberMe = true;
+            _emailController.text = email;
+            _passwordController.text = password;
+          });
+        }
+      }
+    } catch (_) {
+      // Decryption or retrieval failure
+    }
   }
 
   // Handle API login submission
@@ -42,6 +74,18 @@ class _LoginScreenState extends State<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
+
+      final prefs = await SharedPreferences.getInstance();
+      if (_rememberMe) {
+        final crypto = CryptoService();
+        await prefs.setBool('remember_me', true);
+        await prefs.setString('saved_email', crypto.encryptEmail(_emailController.text.trim()));
+        await prefs.setString('saved_password', crypto.encryptPassword(_passwordController.text));
+      } else {
+        await prefs.setBool('remember_me', false);
+        await prefs.remove('saved_email');
+        await prefs.remove('saved_password');
+      }
       
       if (mounted) {
         Navigator.of(context).pushReplacementNamed('/home');
@@ -200,23 +244,59 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 12.0),
                       
-                      // Forgot password link matching secondary links
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Fluxo de recuperação disponível na WebApp.'),
-                                backgroundColor: AppColors.surface,
+                      // Remember me and Forgot password row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Checkbox(
+                                  value: _rememberMe,
+                                  activeColor: AppColors.primary,
+                                  checkColor: AppColors.textLight,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _rememberMe = val ?? false;
+                                    });
+                                  },
+                                ),
                               ),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: AppColors.primary,
+                              const SizedBox(width: 8.0),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _rememberMe = !_rememberMe;
+                                  });
+                                },
+                                child: const Text(
+                                  'Lembrar credenciais',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14.0,
+                                    fontFamily: 'SplineSans',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Text('Esqueceu a senha?'),
-                        ),
+                          TextButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Fluxo de recuperação disponível na WebApp.'),
+                                  backgroundColor: AppColors.surface,
+                                ),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                            ),
+                            child: const Text('Esqueceu a senha?'),
+                          ),
+                        ],
                       ),
                       
                       // API Error container banner

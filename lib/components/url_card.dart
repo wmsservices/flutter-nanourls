@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
@@ -58,6 +59,25 @@ class _UrlCardState extends State<UrlCard> {
         sharePositionOrigin: rect,
       ),
     );
+  }
+
+  Future<void> _launchUrl() async {
+    try {
+      final uri = Uri.parse(widget.url.realUrl);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível abrir o link: ${widget.url.realUrl}'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   void _showShareOptions(BuildContext context) {
@@ -120,7 +140,7 @@ class _UrlCardState extends State<UrlCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Redirecionamento (GO)',
+                                'NanoUrl GO',
                                 style: TextStyle(
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
@@ -171,7 +191,7 @@ class _UrlCardState extends State<UrlCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Página de Detalhes (ME)',
+                                'NanoUrl ME',
                                 style: TextStyle(
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
@@ -260,7 +280,7 @@ class _UrlCardState extends State<UrlCard> {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withValues(alpha: 0.05),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -275,14 +295,17 @@ class _UrlCardState extends State<UrlCard> {
           child: Row(
             children: [
               Expanded(
-                child: Text(
-                  widget.url.shortUrl,
-                  style: const TextStyle(
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                child: GestureDetector(
+                  onTap: _launchUrl,
+                  child: Text(
+                    widget.url.shortUrl,
+                    style: const TextStyle(
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (widget.url.hasPassword) ...[
@@ -340,14 +363,17 @@ class _UrlCardState extends State<UrlCard> {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          widget.url.shortUrl,
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        child: GestureDetector(
+                          onTap: _launchUrl,
+                          child: Text(
+                            widget.url.shortUrl,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       if (widget.url.hasPassword) ...[

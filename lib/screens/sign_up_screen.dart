@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/gestures.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -28,10 +30,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? _errorMessage;
   String? _successMessage;
 
+  late TapGestureRecognizer _termsTapRecognizer;
+  late TapGestureRecognizer _privacyTapRecognizer;
+  late TapGestureRecognizer _agreeTermsTextRecognizer;
+  late TapGestureRecognizer _agreePrivacyTextRecognizer;
+
   @override
   void initState() {
     super.initState();
     _passwordController.addListener(_updatePasswordStrength);
+    _termsTapRecognizer = TapGestureRecognizer()
+      ..onTap = () => _launchUrl('https://nanourls.com/Terms');
+    _privacyTapRecognizer = TapGestureRecognizer()
+      ..onTap = () => _launchUrl('https://nanourls.com/Privacy');
+    _agreeTermsTextRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        setState(() {
+          _agreeTerms = !_agreeTerms;
+        });
+      };
+    _agreePrivacyTextRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        setState(() {
+          _agreePrivacy = !_agreePrivacy;
+        });
+      };
   }
 
   @override
@@ -40,7 +63,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _termsTapRecognizer.dispose();
+    _privacyTapRecognizer.dispose();
+    _agreeTermsTextRecognizer.dispose();
+    _agreePrivacyTextRecognizer.dispose();
     super.dispose();
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    try {
+      final uri = Uri.parse(urlString);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Não foi possível abrir o link: $urlString'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
   }
 
   void _updatePasswordStrength() {
@@ -77,6 +123,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final userEmail = _emailController.text.trim();
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -86,12 +134,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     try {
       await _apiService.signUp(
         _nameController.text.trim(),
-        _emailController.text.trim(),
+        userEmail,
         _passwordController.text,
       );
 
       setState(() {
-        _successMessage = 'Conta criada com sucesso! Verifique seu e-mail para confirmação.';
         _nameController.clear();
         _emailController.clear();
         _passwordController.clear();
@@ -101,12 +148,78 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _passwordScore = 0;
       });
 
-      // Automatically navigate back to Login after a short delay
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
-      });
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) {
+            return AlertDialog(
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+                side: const BorderSide(color: AppColors.border),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.check_circle_outline, color: AppColors.primary, size: 28),
+                  SizedBox(width: 8),
+                  Text(
+                    'Sucesso!',
+                    style: TextStyle(
+                      fontFamily: 'SplineSans',
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                ],
+              ),
+              content: RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontFamily: 'SplineSans',
+                    color: AppColors.textMuted,
+                    fontSize: 14.0,
+                    height: 1.5,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Parabéns, sua conta '),
+                    const TextSpan(
+                      text: 'NanoUrls',
+                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: ' foi criada com sucesso! Enviamos um e-mail para '),
+                    TextSpan(
+                      text: userEmail,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: ', caso não encontre na caixa de entrada, por favor verifique no Lixo Eletrônico.'),
+                  ],
+                ),
+              ),
+              actions: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                      Navigator.of(context).pushReplacementNamed('/login'); // Return to login
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.textLight,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                    ),
+                    child: const Text('OK'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -452,31 +565,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(width: 12.0),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _agreeTerms = !_agreeTerms;
-                                });
-                              },
-                              child: RichText(
-                                text: const TextSpan(
-                                  text: 'Li e concordo com os ',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14.0,
-                                    fontFamily: 'SplineSans',
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Termos de Uso',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ],
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'Li e concordo com os ',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14.0,
+                                  fontFamily: 'SplineSans',
                                 ),
+                                recognizer: _agreeTermsTextRecognizer,
+                                children: [
+                                  TextSpan(
+                                    text: 'Termos de Uso',
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: _termsTapRecognizer,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -503,31 +611,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(width: 12.0),
                           Expanded(
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _agreePrivacy = !_agreePrivacy;
-                                });
-                              },
-                              child: RichText(
-                                text: const TextSpan(
-                                  text: 'Li e concordo com a ',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14.0,
-                                    fontFamily: 'SplineSans',
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Política de Privacidade',
-                                      style: TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ],
+                            child: RichText(
+                              text: TextSpan(
+                                text: 'Li e concordo com a ',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14.0,
+                                  fontFamily: 'SplineSans',
                                 ),
+                                recognizer: _agreePrivacyTextRecognizer,
+                                children: [
+                                  TextSpan(
+                                    text: 'Política de Privacidade',
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    recognizer: _privacyTapRecognizer,
+                                  ),
+                                ],
                               ),
                             ),
                           ),

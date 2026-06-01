@@ -138,6 +138,28 @@ class CryptoHelper {
     return _fixedTimeEquals(storedHash, computedHash);
   }
 
+  /// Top-level/static entrypoint to run verifyPassword inside compute background Isolate
+  static bool verifyPasswordIsolate(Map<String, String> params) {
+    final password = params['password'] ?? '';
+    final hashedPassword = params['hashedPassword'] ?? '';
+    return verifyPassword(password, hashedPassword);
+  }
+
+  /// Runs both current and new password validation checks inside compute background Isolate
+  static Map<String, bool> verifyChangePasswordIsolate(Map<String, String> params) {
+    final currentPassword = params['currentPassword'] ?? '';
+    final newPassword = params['newPassword'] ?? '';
+    final hashedPassword = params['hashedPassword'] ?? '';
+    
+    final isCurrentCorrect = verifyPassword(currentPassword, hashedPassword);
+    final isNewSame = verifyPassword(newPassword, hashedPassword);
+    
+    return {
+      'isCurrentCorrect': isCurrentCorrect,
+      'isNewSame': isNewSame,
+    };
+  }
+
   static bool _fixedTimeEquals(Uint8List a, Uint8List b) {
     if (a.length != b.length) return false;
     var result = 0;

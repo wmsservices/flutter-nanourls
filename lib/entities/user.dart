@@ -7,6 +7,7 @@ class User {
   final bool enabled;
   final DateTime createdAt;
   final DateTime lastModified;
+  final String? passwordHash;
 
   User({
     required this.userId,
@@ -16,6 +17,7 @@ class User {
     required this.enabled,
     required this.createdAt,
     required this.lastModified,
+    this.passwordHash,
   });
 
   // Factory constructor to parse the User model from a JSON map
@@ -32,6 +34,7 @@ class User {
       lastModified: json['lastModified'] != null 
           ? DateTime.parse(json['lastModified']) 
           : DateTime.now(),
+      passwordHash: json['password'],
     );
   }
 
@@ -45,6 +48,7 @@ class User {
       'enabled': enabled,
       'createdAt': createdAt.toIso8601String(),
       'lastModified': lastModified.toIso8601String(),
+      'password': passwordHash,
     };
   }
 }

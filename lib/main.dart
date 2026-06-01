@@ -7,6 +7,7 @@ import 'screens/link_details_screen.dart';
 import 'screens/create_edit_url_screen.dart';
 import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
+import 'screens/my_account_screen.dart';
 
 void main() {
   // Ensure Flutter engine bindings are initialized
@@ -37,6 +38,7 @@ class MyApp extends StatelessWidget {
         '/create-edit': (context) => const CreateEditUrlScreen(),
         '/url-info': (context) => const UrlInfoScreen(),
         '/signup': (context) => const SignUpScreen(),
+        '/account': (context) => const MyAccountScreen(),
       },
       
       // Handle dynamic route arguments for detail view
