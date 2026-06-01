@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
@@ -64,7 +65,7 @@ class _UrlCardState extends State<UrlCard> {
     final goLink = widget.url.goLink;
 
     if (meLink == null || meLink.isEmpty) {
-      _shareLink(context, goLink);
+      _shareLink(context, 'Use $goLink');
       return;
     }
 
@@ -96,7 +97,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, goLink);
+                    _shareLink(context, 'Use $goLink');
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
@@ -108,7 +109,11 @@ class _UrlCardState extends State<UrlCard> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.bolt, color: AppColors.primary, size: 24),
+                        SvgPicture.asset(
+                          'assets/svg/logo.svg',
+                          width: 24,
+                          height: 24,
+                        ),
                         const SizedBox(width: 12.0),
                         Expanded(
                           child: Column(
@@ -143,7 +148,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, meLink);
+                    _shareLink(context, 'Use $meLink');
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
@@ -155,7 +160,11 @@ class _UrlCardState extends State<UrlCard> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline, color: Colors.blueAccent, size: 24),
+                        SvgPicture.asset(
+                          'assets/svg/logo.svg',
+                          width: 24,
+                          height: 24,
+                        ),
                         const SizedBox(width: 12.0),
                         Expanded(
                           child: Column(

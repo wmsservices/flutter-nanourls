@@ -45,4 +45,40 @@ class GlyphHelper {
       default: return Icons.link;
     }
   }
+
+  static String getGlyphLabel(String glyph) {
+    switch (glyph.toLowerCase()) {
+      case 'link': return 'Link';
+      case 'star': return 'Estrela';
+      case 'favorite': return 'Favorito';
+      case 'home': return 'Início';
+      case 'work': return 'Trabalho';
+      case 'shopping_cart': return 'Carrinho';
+      case 'rocket_launch': return 'Foguete';
+      case 'bolt': return 'Raio';
+      case 'mail': return 'Email';
+      case 'person': return 'Perfil';
+      case 'verified': return 'Verificado';
+      case 'lock': return 'Senha';
+      case 'schedule': return 'Agenda';
+      case 'group': return 'Grupo';
+      case 'photo_camera': return 'Câmera';
+      case 'music_note': return 'Música';
+      case 'flight': return 'Voo';
+      case 'restaurant': return 'Comida';
+      case 'school': return 'Estudo';
+      case 'code': return 'Código';
+      case 'search': return 'Busca';
+      case 'settings': return 'Ajustes';
+      case 'notifications': return 'Aviso';
+      case 'share': return 'Partilhar';
+      case 'delete': return 'Lixeira';
+      case 'edit': return 'Editar';
+      case 'check_circle': return 'Sucesso';
+      case 'warning': return 'Alerta';
+      case 'info': return 'Info';
+      case 'help': return 'Ajuda';
+      default: return glyph;
+    }
+  }
 }

@@ -723,7 +723,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.grid_view, color: AppColors.primary, size: 18),
                   const SizedBox(width: 8.0),
                   Text(
-                    'Todos os ícones',
+                    'Todos',
                     style: TextStyle(
                       color: _selectedGlyphFilter == 'todos' ? AppColors.primary : Colors.white70,
                       fontSize: 14.0,
@@ -735,7 +735,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ...GlyphHelper.availableGlyphs.map((String glyph) {
               final icon = GlyphHelper.getIconData(glyph);
-              final displayName = glyph[0].toUpperCase() + glyph.substring(1).replaceAll('_', ' ');
+              final displayName = GlyphHelper.getGlyphLabel(glyph);
               final isSelected = _selectedGlyphFilter == glyph;
               return DropdownMenuItem<String>(
                 value: glyph,
