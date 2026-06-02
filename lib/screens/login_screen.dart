@@ -284,12 +284,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Fluxo de recuperação disponível na WebApp.'),
-                                  backgroundColor: AppColors.surface,
-                                ),
-                              );
+                              Navigator.pushNamed(context, '/forgot-password');
                             },
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primary,

@@ -102,6 +102,7 @@ class DashboardDataDto {
   final String description;
   final String userId;
   final DateTime createdDate;
+  final DateTime lastModifiedDate;
   final int totalClicks;
   final int clicksToday;
   final int uniqueVisitors;
@@ -124,6 +125,7 @@ class DashboardDataDto {
     required this.description,
     required this.userId,
     required this.createdDate,
+    required this.lastModifiedDate,
     required this.totalClicks,
     required this.clicksToday,
     required this.uniqueVisitors,
@@ -149,6 +151,9 @@ class DashboardDataDto {
       userId: json['userId'] ?? '',
       createdDate: json['createdDate'] != null
           ? DateTime.parse(json['createdDate'])
+          : DateTime.now(),
+      lastModifiedDate: json['lastModifiedDate'] != null
+          ? DateTime.parse(json['lastModifiedDate'])
           : DateTime.now(),
       totalClicks: json['totalClicks'] ?? 0,
       clicksToday: json['clicksToday'] ?? 0,
@@ -184,6 +189,7 @@ class DashboardDataDto {
       'description': description,
       'userId': userId,
       'createdDate': createdDate.toIso8601String(),
+      'lastModifiedDate': lastModifiedDate.toIso8601String(),
       'totalClicks': totalClicks,
       'clicksToday': clicksToday,
       'uniqueVisitors': uniqueVisitors,

@@ -158,6 +158,33 @@ class ApiService {
     }
   }
 
+  // Requests a password reset link GET request to /v1/forgot-pass/request-change/{email}
+  Future<void> requestPasswordReset(String email) async {
+    final url = Uri.parse('$_baseUrl/v1/forgot-pass/request-change/${Uri.encodeComponent(email.trim().toLowerCase())}');
+    final locale = _getLocaleHeader();
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'accept': '*/*',
+          'Accept-Language': locale,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        if (response.statusCode == 400) {
+          throw const HttpException('E-mail não cadastrado ou formato inválido.');
+        }
+        throw HttpException(_parseError(response));
+      }
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique suas conexões.');
+    } catch (e) {
+      if (e is HttpException) rethrow;
+      throw HttpException('Erro de rede: ${e.toString()}');
+    }
+  }
+
   // Fetches analytical metrics GET request to /v1/analytics/dashboard/{shortCode}/{days}
   Future<DashboardDataDto> fetchUrlAnalytics(String shortCode, {int days = 7}) async {
     final token = _sessionManager.token;

@@ -3,11 +3,12 @@ import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/link_details_screen.dart';
+import 'screens/analytics_screen.dart';
 import 'screens/create_edit_url_screen.dart';
 import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/my_account_screen.dart';
+import 'screens/forgot_pass_screen.dart';
 
 void main() {
   // Ensure Flutter engine bindings are initialized
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         '/url-info': (context) => const UrlInfoScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/account': (context) => const MyAccountScreen(),
+        '/forgot-password': (context) => const ForgotPassScreen(),
       },
       
       // Handle dynamic route arguments for detail view
@@ -46,7 +48,7 @@ class MyApp extends StatelessWidget {
         if (settings.name == '/details') {
           final shortCode = settings.arguments as String? ?? '';
           return MaterialPageRoute(
-            builder: (context) => LinkDetailsScreen(shortCode: shortCode),
+            builder: (context) => AnalyticsScreen(shortCode: shortCode),
             settings: settings,
           );
         }
