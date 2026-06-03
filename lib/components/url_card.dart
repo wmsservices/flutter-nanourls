@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
+import '../l10n/app_localizations.dart';
 
 // Card displaying shortened URL details, stats, and actions
 class UrlCard extends StatefulWidget {
@@ -72,7 +73,7 @@ class _UrlCardState extends State<UrlCard> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Não foi possível abrir o link: ${widget.url.realUrl}'),
+            content: Text(context.l10n('cannot_open_link', args: [widget.url.realUrl])),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -85,7 +86,7 @@ class _UrlCardState extends State<UrlCard> {
     final goLink = widget.url.goLink;
 
     if (meLink == null || meLink.isEmpty) {
-      _shareLink(context, 'Use $goLink');
+      _shareLink(context, context.l10n('share_text_prefix', args: [goLink]));
       return;
     }
 
@@ -103,9 +104,9 @@ class _UrlCardState extends State<UrlCard> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Escolha o link para compartilhar',
-                  style: TextStyle(
+                Text(
+                  context.l10n('share_sheet_title'),
+                  style: const TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -117,7 +118,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, 'Use $goLink');
+                    _shareLink(context, context.l10n('share_text_prefix', args: [goLink]));
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
@@ -139,8 +140,8 @@ class _UrlCardState extends State<UrlCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'NanoUrl GO',
+                              Text(
+                                context.l10n('share_option_go'),
                                 style: TextStyle(
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
@@ -168,7 +169,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, 'Use $meLink');
+                    _shareLink(context, context.l10n('share_text_prefix', args: [meLink]));
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
@@ -190,8 +191,8 @@ class _UrlCardState extends State<UrlCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'NanoUrl ME',
+                              Text(
+                                context.l10n('share_option_me'),
                                 style: TextStyle(
                                   fontSize: 14.0,
                                   fontWeight: FontWeight.bold,
@@ -390,8 +391,8 @@ class _UrlCardState extends State<UrlCard> {
                   // Status Label
                   Text(
                     !isEnabled
-                        ? 'LIXEIRA'
-                        : (isExpired ? 'EXPIRADO' : 'ATIVO'),
+                        ? context.l10n('status_trash')
+                        : (isExpired ? context.l10n('status_expired') : context.l10n('status_active')),
                     style: TextStyle(
                       fontSize: 10.0,
                       fontWeight: FontWeight.bold,
@@ -428,64 +429,64 @@ class _UrlCardState extends State<UrlCard> {
               itemBuilder: (BuildContext context) {
                 return [
                   if (isEnabled) ...[
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'details',
                       child: Row(
                         children: [
-                          Icon(Icons.info_outline, size: 18.0, color: AppColors.primary),
-                          SizedBox(width: 8.0),
-                          Text('Detalhes', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.info_outline, size: 18.0, color: AppColors.primary),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('details'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'qrcode',
                       child: Row(
                         children: [
-                          Icon(Icons.qr_code, size: 18.0, color: Colors.blueAccent),
-                          SizedBox(width: 8.0),
-                          Text('Código QR', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.qr_code, size: 18.0, color: Colors.blueAccent),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('qr_code'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 18.0, color: Colors.white70),
-                          SizedBox(width: 8.0),
-                          Text('Editar', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.edit, size: 18.0, color: Colors.white70),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('edit'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete, size: 18.0, color: Colors.redAccent),
-                          SizedBox(width: 8.0),
-                          Text('Excluir', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.delete, size: 18.0, color: Colors.redAccent),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('delete'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
                   ] else ...[
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'restore',
                       child: Row(
                         children: [
-                          Icon(Icons.restore_from_trash, size: 18.0, color: Colors.greenAccent),
-                          SizedBox(width: 8.0),
-                          Text('Restaurar', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.restore_from_trash, size: 18.0, color: Colors.greenAccent),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('restore'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
-                          Icon(Icons.delete_forever, size: 18.0, color: Colors.redAccent),
-                          SizedBox(width: 8.0),
-                          Text('Excluir Definitivo', style: TextStyle(fontSize: 14.0)),
+                          const Icon(Icons.delete_forever, size: 18.0, color: Colors.redAccent),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('delete_permanently'), style: const TextStyle(fontSize: 14.0)),
                         ],
                       ),
                     ),
@@ -530,9 +531,9 @@ class _UrlCardState extends State<UrlCard> {
             overflow: TextOverflow.ellipsis,
           )
         else
-          const Text(
-            'Sem descrição',
-            style: TextStyle(
+          Text(
+            context.l10n('no_description'),
+            style: const TextStyle(
               fontSize: 13.0,
               fontStyle: FontStyle.italic,
               color: Colors.white24,
@@ -553,8 +554,8 @@ class _UrlCardState extends State<UrlCard> {
               const SizedBox(width: 4.0),
               Text(
                 isExpired
-                    ? 'Expirou em: ${widget.url.expiresAt!.toLocal().toString().substring(0, 16)}'
-                    : 'Expira em: ${widget.url.expiresAt!.toLocal().toString().substring(0, 16)}',
+                    ? context.l10n('expired_at_label', args: [widget.url.expiresAt!.toLocal().toString().substring(0, 16)])
+                    : context.l10n('expires_at_label', args: [widget.url.expiresAt!.toLocal().toString().substring(0, 16)]),
                 style: TextStyle(
                   fontSize: 11.0,
                   color: isExpired ? Colors.redAccent : Colors.orangeAccent,
@@ -599,9 +600,9 @@ class _UrlCardState extends State<UrlCard> {
                       ),
                     ),
                     const SizedBox(width: 4.0),
-                    const Text(
-                      'cliques',
-                      style: TextStyle(
+                    Text(
+                      context.l10n('clicks_label'),
+                      style: const TextStyle(
                         fontSize: 11.0,
                         color: AppColors.textMuted,
                       ),
@@ -635,9 +636,9 @@ class _UrlCardState extends State<UrlCard> {
                       color: AppColors.textMuted,
                     ),
                     const SizedBox(width: 6.0),
-                    const Text(
-                      'Compartilhar',
-                      style: TextStyle(
+                    Text(
+                      context.l10n('share'),
+                      style: const TextStyle(
                         fontSize: 12.0,
                         color: AppColors.textMuted,
                         fontWeight: FontWeight.w500,

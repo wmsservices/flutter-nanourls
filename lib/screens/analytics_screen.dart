@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../dtos/dashboard_data_dto.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -67,7 +68,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Copiado para a área de transferência!'),
+          content: Text(context.l10n('copy_success_snackbar')),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 1),
         ),
@@ -84,7 +85,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Código Curto', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+              Text(context.l10n('short_code'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4.0),
               Text(
                 _data.shortCode,
@@ -108,9 +109,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.primary.withOpacity(0.3)),
           ),
-          child: const Text(
-            'ATIVO',
-            style: TextStyle(
+          child: Text(
+            context.l10n('status_active'),
+            style: const TextStyle(
               color: AppColors.primary,
               fontSize: 10.0,
               fontWeight: FontWeight.bold,
@@ -145,7 +146,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Código Curto', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+                  Text(context.l10n('short_code'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4.0),
                   Text(
                     _data.shortCode,
@@ -169,9 +170,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: AppColors.primary.withOpacity(0.3)),
               ),
-              child: const Text(
-                'ATIVO',
-                style: TextStyle(
+              child: Text(
+                context.l10n('status_active'),
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontSize: 10.0,
                   fontWeight: FontWeight.bold,
@@ -194,7 +195,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         const Divider(color: AppColors.borderSubtle, height: 24.0),
 
         // URL Original
-        const Text('URL Original', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+        Text(context.l10n('original_url'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4.0),
         InkWell(
           onTap: () => _copyToClipboard(_data.targetUrl),
@@ -208,7 +209,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         const SizedBox(height: 16.0),
 
         // Link Encurtado Principal (GO)
-        const Text('Link Encurtado Principal (GO)', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+        Text(context.l10n('main_shortlink'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4.0),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,7 +233,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
         // Link Encurtado Alternativo (ME)
         if (_data.shortMeUrl.isNotEmpty) ...[
-          const Text('Link Encurtado Alternativo (ME)', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+          Text(context.l10n('alt_shortlink'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -257,7 +258,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
         // Description
         if (_data.description.isNotEmpty) ...[
-          const Text('Descrição', style: TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
+          Text(context.l10n('description'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4.0),
           Text(
             _data.description,
@@ -277,7 +278,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Criado em', style: TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
+                Text(context.l10n('created_at'), style: const TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2.0),
                 Text(
                   _formatDate(_data.createdDate),
@@ -285,11 +286,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ],
             ),
-            if (_data.lastModifiedDate != null && !_isSameDay(_data.createdDate, _data.lastModifiedDate))
+            if (!_isSameDay(_data.createdDate, _data.lastModifiedDate))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text('Alterado em', style: TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
+                  Text(context.l10n('modified_at'), style: const TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2.0),
                   Text(
                     _formatDate(_data.lastModifiedDate),
@@ -320,7 +321,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       return Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text('Estatísticas do Link'),
+          title: Text(context.l10n('analytics_screen_title')),
         ),
         body: Center(
           child: Padding(
@@ -331,14 +332,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 const Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
                 const SizedBox(height: 16.0),
                 Text(
-                  _errorMessage ?? 'Erro ao carregar estatísticas.',
+                  _errorMessage ?? context.l10n('error_loading_analytics'),
                   style: const TextStyle(color: Colors.white70, fontSize: 16.0),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: _loadAnalytics,
-                  child: const Text('Tentar Novamente'),
+                  child: Text(context.l10n('try_again')),
                 ),
               ],
             ),
@@ -355,7 +356,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Estatísticas do Link'),
+        title: Text(context.l10n('analytics_screen_title')),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -398,9 +399,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 mainAxisSpacing: 10,
                 childAspectRatio: 0.85,
                 children: [
-                  _buildMetricsBox('Cliques Totais', '${_data.totalClicks}', _data.totalClicksTrend, Icons.ads_click),
-                  _buildMetricsBox('Últimas 24h', '${_data.clicksToday}', _data.clicksTodayTrend, Icons.schedule),
-                  _buildMetricsBox('Visitantes Únicos', '${_data.uniqueVisitors}', _data.uniqueVisitorsTrend, Icons.group),
+                  _buildMetricsBox(context.l10n('clicks_count'), '${_data.totalClicks}', _data.totalClicksTrend, Icons.ads_click),
+                  _buildMetricsBox(context.l10n('last_24h'), '${_data.clicksToday}', _data.clicksTodayTrend, Icons.schedule),
+                  _buildMetricsBox(context.l10n('unique_visitors'), '${_data.uniqueVisitors}', _data.uniqueVisitorsTrend, Icons.group),
                 ],
               ),
             ),
@@ -413,9 +414,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Cliques ao Longo do Tempo',
-                      style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                    Text(
+                      context.l10n('clicks_over_time'),
+                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 8.0),
                     // Daily/Hourly Selector
@@ -429,8 +430,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           padding: const EdgeInsets.all(2.0),
                           child: Row(
                             children: [
-                              _buildChartToggleButton('Diário', !_useHourlyChart),
-                              _buildChartToggleButton('Horário', _useHourlyChart),
+                              _buildChartToggleButton(context.l10n('daily_toggle'), !_useHourlyChart),
+                              _buildChartToggleButton(context.l10n('hourly_toggle'), _useHourlyChart),
                             ],
                           ),
                         ),
@@ -438,9 +439,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     ),
                     const SizedBox(height: 16.0),
                     // Period Selector Label
-                    const Text(
-                      'Períodos',
-                      style: TextStyle(fontSize: 12.0, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                    Text(
+                      context.l10n('periods_label'),
+                      style: const TextStyle(fontSize: 12.0, color: AppColors.textMuted, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 6.0),
                     // Period Toggles: 7 Dias / 30 Dias / Ano
@@ -454,9 +455,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           padding: const EdgeInsets.all(2.0),
                           child: Row(
                             children: [
-                              _buildPeriodToggleButton('7 Dias', _selectedDays == 7),
-                              _buildPeriodToggleButton('30 Dias', _selectedDays == 30),
-                              _buildPeriodToggleButton('Ano', _selectedDays == 365),
+                              _buildPeriodToggleButton(context.l10n('period_7_days'), _selectedDays == 7),
+                              _buildPeriodToggleButton(context.l10n('period_30_days'), _selectedDays == 30),
+                              _buildPeriodToggleButton(context.l10n('period_year'), _selectedDays == 365),
                             ],
                           ),
                         ),
@@ -494,11 +495,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16.0),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'Origem do Tráfego',
-                        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                        context.l10n('top_referrers'),
+                        style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                     ),
                     const Divider(color: AppColors.borderSubtle, height: 1.0),
@@ -509,10 +510,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       separatorBuilder: (context, idx) => const Divider(color: AppColors.borderSubtle, height: 1.0),
                       itemBuilder: (context, index) {
                         if (_data.referrers.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.all(24.0),
+                          return Padding(
+                            padding: const EdgeInsets.all(24.0),
                             child: Center(
-                              child: Text('Sem dados de origem disponíveis.', style: TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
+                              child: Text(context.l10n('no_referrer_data'), style: const TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
                             ),
                           );
                         }
@@ -535,7 +536,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               Expanded(
                                 child: Text(refItem.source, style: const TextStyle(fontWeight: FontWeight.w500)),
                               ),
-                              Text('${refItem.clicks} cliq.', style: const TextStyle(color: Colors.white70)),
+                              Text(context.l10n('clicks_abbr', args: [refItem.clicks]), style: const TextStyle(color: Colors.white70)),
                               const SizedBox(width: 12),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -573,16 +574,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Principais Países',
-                        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                      Text(
+                        context.l10n('top_countries'),
+                        style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 16.0),
                       if (_data.locations.isEmpty)
-                        const Center(
+                        Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16.0),
-                            child: Text('Sem dados geográficos.', style: TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: Text(context.l10n('no_location_data'), style: const TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
                           ),
                         )
                       else
@@ -609,16 +610,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Principais Cidades',
-                        style: TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                      Text(
+                        context.l10n('top_cities'),
+                        style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 16.0),
                       if (_data.topCities.isEmpty)
-                        const Center(
+                        Center(
                           child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16.0),
-                            child: Text('Sem dados de cidades.', style: TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: Text(context.l10n('no_location_data'), style: const TextStyle(color: Colors.white24, fontStyle: FontStyle.italic)),
                           ),
                         )
                       else
@@ -701,7 +702,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _useHourlyChart = label == 'Horário';
+          _useHourlyChart = label == context.l10n('hourly_toggle');
         });
       },
       child: Container(
@@ -727,8 +728,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return GestureDetector(
       onTap: () {
         int days = 7;
-        if (label == '30 Dias') days = 30;
-        if (label == 'Ano') days = 365;
+        if (label == context.l10n('period_30_days')) days = 30;
+        if (label == context.l10n('period_year')) days = 365;
         if (days != _selectedDays) {
           setState(() {
             _selectedDays = days;
@@ -756,20 +757,24 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   // Date formatting helpers
   String _formatDate(DateTime date) {
-    return "${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}. ${date.year}";
+    return "${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month, context)}. ${date.year}";
   }
 
   bool _isSameDay(DateTime d1, DateTime d2) {
     return d1.year == d2.year && d1.month == d2.month && d1.day == d2.day;
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-      'jul', 'ago', 'set', 'out', 'nov', 'dez'
-    ];
+  String _getMonthName(int month, BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+    const months = {
+      'en': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      'pt': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+      'es': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      'fr': ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+    };
+    final list = months[locale] ?? months['en']!;
     if (month >= 1 && month <= 12) {
-      return months[month - 1];
+      return list[month - 1];
     }
     return '';
   }

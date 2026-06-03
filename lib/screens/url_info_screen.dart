@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class UrlInfoScreen extends StatelessWidget {
   const UrlInfoScreen({super.key});
 
-  void _copyToClipboard(BuildContext context, String text, String label) {
+  void _copyToClipboard(BuildContext context, String text) {
     final messenger = ScaffoldMessenger.of(context);
+    final message = context.l10n('copy_success_snackbar');
     Clipboard.setData(ClipboardData(text: text)).then((_) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('$label copiado para a área de transferência!'),
+          content: Text(message),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 1),
         ),
@@ -26,7 +28,7 @@ class UrlInfoScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Detalhes da URL'),
+        title: Text(context.l10n('url_details_title')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -58,9 +60,9 @@ class UrlInfoScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'URL ENCURTADA',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('shortened_url_label').toUpperCase(),
+                        style: const TextStyle(
                           fontSize: 10.0,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
@@ -69,7 +71,7 @@ class UrlInfoScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 6.0),
                       GestureDetector(
-                        onTap: () => _copyToClipboard(context, url.goLink, 'Link encurtado'),
+                        onTap: () => _copyToClipboard(context, url.goLink),
                         child: Text(
                           url.goLink,
                           style: const TextStyle(
@@ -87,9 +89,9 @@ class UrlInfoScreen extends StatelessWidget {
                 const SizedBox(height: 24.0),
 
                 // Original Destination Link
-                const Text(
-                  'DESTINO ORIGINAL',
-                  style: TextStyle(
+                Text(
+                  context.l10n('original_destination_label').toUpperCase(),
+                  style: const TextStyle(
                     fontSize: 10.0,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -98,7 +100,7 @@ class UrlInfoScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6.0),
                 GestureDetector(
-                  onTap: () => _copyToClipboard(context, url.realUrl, 'Destino original'),
+                  onTap: () => _copyToClipboard(context, url.realUrl),
                   child: Text(
                     url.realUrl,
                     style: const TextStyle(
@@ -111,9 +113,9 @@ class UrlInfoScreen extends StatelessWidget {
                 const SizedBox(height: 24.0),
 
                 // Description
-                const Text(
-                  'DESCRIÇÃO',
-                  style: TextStyle(
+                Text(
+                  context.l10n('description').toUpperCase(),
+                  style: const TextStyle(
                     fontSize: 10.0,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.8,
@@ -122,7 +124,7 @@ class UrlInfoScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 6.0),
                 Text(
-                  url.description.isNotEmpty ? url.description : 'Sem descrição',
+                  url.description.isNotEmpty ? url.description : context.l10n('no_description'),
                   style: TextStyle(
                     fontSize: 14.0,
                     color: Colors.white.withOpacity(0.8),
@@ -140,14 +142,14 @@ class UrlInfoScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8.0),
                       border: Border.all(color: Colors.amber.withOpacity(0.2)),
                     ),
-                    child: const Row(
+                    child: Row(
                       children: [
-                        Icon(Icons.lock, color: Colors.amber, size: 16.0),
-                        SizedBox(width: 10.0),
+                        const Icon(Icons.lock, color: Colors.amber, size: 16.0),
+                        const SizedBox(width: 10.0),
                         Expanded(
                           child: Text(
-                            'URL protegida por senha',
-                            style: TextStyle(
+                            context.l10n('password_protected_url'),
+                            style: const TextStyle(
                               fontSize: 13.0,
                               color: Colors.amber,
                               fontWeight: FontWeight.w500,
@@ -167,9 +169,9 @@ class UrlInfoScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Total de Cliques',
-                      style: TextStyle(
+                    Text(
+                      context.l10n('clicks_count'),
+                      style: const TextStyle(
                         fontSize: 16.0,
                         fontWeight: FontWeight.w500,
                         color: Colors.white,
@@ -209,9 +211,9 @@ class UrlInfoScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                 ),
-                child: const Text(
-                  'Voltar',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n('back'),
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
+import '../l10n/app_localizations.dart';
 
 class CreateEditUrlScreen extends StatefulWidget {
   const CreateEditUrlScreen({super.key});
@@ -107,7 +108,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
           _isCheckingAlias = false;
           _aliasAvailable = available;
           if (!available) {
-            _aliasFeedbackText = 'Este alias já está em uso.';
+            _aliasFeedbackText = context.l10n('custom_alias_taken');
           }
         });
       } catch (_) {
@@ -204,7 +205,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
       final minimum = DateTime.now().add(const Duration(hours: 24));
       if (expiresAt.isBefore(minimum)) {
         setState(() {
-          _errorMessage = 'A data de expiração deve ser de pelo menos 24 horas no futuro.';
+          _errorMessage = context.l10n('expiration_error');
           _isSubmitting = false;
         });
         return;
@@ -302,7 +303,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(isEdit ? 'Editar NanoUrl' : 'Criar NanoUrl'),
+        title: Text(isEdit ? context.l10n('edit_url_title') : context.l10n('create_url_title')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -328,9 +329,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                   Center(
                     child: Column(
                       children: [
-                        const Text(
-                          'ÍCONE DO LINK',
-                          style: TextStyle(
+                        Text(
+                          context.l10n('icon_category').toUpperCase(),
+                          style: const TextStyle(
                             fontSize: 11.0,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.8,
@@ -440,9 +441,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                   // Original Destination Link
                   Row(
                     children: [
-                      const Text(
-                        'URL ORIGINAL',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('destination_url_label').toUpperCase(),
+                        style: const TextStyle(
                           fontSize: 10.0,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
@@ -461,17 +462,17 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     controller: _realUrlController,
                     keyboardType: TextInputType.url,
                     style: const TextStyle(color: Colors.white, fontSize: 14.0),
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.link, size: 20.0),
-                      hintText: 'https://exemplo.com/pagina-longa',
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.link, size: 20.0),
+                      hintText: context.l10n('destination_url_hint'),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Por favor, insira a URL original.';
+                        return context.l10n('destination_url_validation_empty');
                       }
                       final lower = value.toLowerCase();
                       if (!lower.startsWith('http://') && !lower.startsWith('https://')) {
-                        return 'A URL deve começar com http:// ou https://';
+                        return context.l10n('destination_url_validation_invalid');
                       }
                       return null;
                     },
@@ -479,9 +480,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                   const SizedBox(height: 16.0),
 
                   // Description input
-                  const Text(
-                    'DESCRIÇÃO',
-                    style: TextStyle(
+                  Text(
+                    context.l10n('description_label').toUpperCase(),
+                    style: const TextStyle(
                       fontSize: 10.0,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 0.8,
@@ -492,8 +493,8 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                   TextFormField(
                     controller: _descriptionController,
                     style: const TextStyle(color: Colors.white, fontSize: 14.0),
-                    decoration: const InputDecoration(
-                      hintText: 'Descrição amigável deste link...',
+                    decoration: InputDecoration(
+                      hintText: context.l10n('description_hint'),
                     ),
                   ),
                   const SizedBox(height: 16.0),
@@ -502,9 +503,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'ALIAS PERSONALIZADO',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('custom_alias_label').toUpperCase(),
+                        style: const TextStyle(
                           fontSize: 10.0,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.8,
@@ -512,7 +513,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                         ),
                       ),
                       Text(
-                        isEdit ? 'Não editável' : 'Opcional',
+                        isEdit ? context.l10n('not_editable') : context.l10n('optional'),
                         style: const TextStyle(
                           fontSize: 10.0,
                           color: AppColors.textMuted,
@@ -530,7 +531,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     ),
                     onChanged: _onShortUrlChanged,
                     decoration: InputDecoration(
-                      hintText: isEdit ? '' : 'ex: cupom-natal',
+                      hintText: isEdit ? '' : context.l10n('custom_alias_hint'),
                       suffixIcon: aliasSuffixIcon != null
                           ? Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12.0),
@@ -579,13 +580,13 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Definir Expiração',
-                                    style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
+                                  Text(
+                                    context.l10n('expiration_label'),
+                                    style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
-                                  const Text(
-                                    'O link deixará de funcionar na data',
-                                    style: TextStyle(fontSize: 11.0, color: AppColors.textMuted),
+                                  Text(
+                                    context.l10n('expiration_desc'),
+                                    style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted),
                                   ),
                                 ],
                               ),
@@ -655,13 +656,13 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Proteger com Senha',
-                                    style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
+                                  Text(
+                                    context.l10n('password_protect_label'),
+                                    style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
                                   ),
-                                  const Text(
-                                    'Requer senha para redirecionar',
-                                    style: TextStyle(fontSize: 11.0, color: AppColors.textMuted),
+                                  Text(
+                                    context.l10n('password_protect_desc'),
+                                    style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted),
                                   ),
                                 ],
                               ),
@@ -686,11 +687,11 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                             obscureText: true,
                             style: const TextStyle(color: Colors.white, fontSize: 14.0),
                             decoration: InputDecoration(
-                              hintText: isEdit ? 'Digite nova senha (ou deixe em branco)' : 'Senha de acesso',
+                              hintText: isEdit ? context.l10n('password_edit_hint') : context.l10n('password_create_hint'),
                             ),
                             validator: (value) {
                               if (_checkPassword && !isEdit && (value == null || value.trim().isEmpty)) {
-                                  return 'Por favor, defina uma senha.';
+                                  return context.l10n('url_password_validation_empty');
                               }
                               return null;
                             },
@@ -718,13 +719,13 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Ativar Analytics',
-                                style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
+                              Text(
+                                context.l10n('click_track_label'),
+                                style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold, color: Colors.white),
                               ),
-                              const Text(
-                                'Coletar dados estatísticos de acessos',
-                                style: TextStyle(fontSize: 11.0, color: AppColors.textMuted),
+                              Text(
+                                context.l10n('click_track_desc'),
+                                style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted),
                               ),
                             ],
                           ),
@@ -774,7 +775,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     children: [
                       TextButton(
                         onPressed: _isSubmitting ? null : () => Navigator.pop(context),
-                        child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+                        child: Text(context.l10n('cancel'), style: const TextStyle(color: Colors.white70)),
                       ),
                       const SizedBox(width: 12.0),
                       ElevatedButton(
@@ -793,7 +794,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                 children: [
                                   const Icon(Icons.save, size: 16),
                                   const SizedBox(width: 6.0),
-                                  Text(isEdit ? 'Salvar' : 'Criar'),
+                                  Text(isEdit ? context.l10n('save') : context.l10n('create')),
                                 ],
                               ),
                       ),

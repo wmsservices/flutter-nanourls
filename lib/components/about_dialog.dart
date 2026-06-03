@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class AboutNanoUrlsDialog extends StatelessWidget {
   const AboutNanoUrlsDialog({super.key});
@@ -42,7 +43,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           // App Title with styling
           Text.rich(
             TextSpan(
-              text: 'Sobre ',
+              text: context.l10n('about_dialog_title'),
               style: const TextStyle(
                 fontFamily: 'SplineSans',
                 fontSize: 22.0,
@@ -69,9 +70,9 @@ class AboutNanoUrlsDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(9999),
               border: Border.all(color: AppColors.primary.withOpacity(0.15)),
             ),
-            child: const Text(
-              'Versão 1.0.0',
-              style: TextStyle(
+            child: Text(
+              context.l10n('about_dialog_version'),
+              style: const TextStyle(
                 fontFamily: 'SplineSans',
                 fontSize: 12.0,
                 fontWeight: FontWeight.bold,
@@ -82,10 +83,10 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           const SizedBox(height: 20.0),
           
           // Description
-          const Text(
-            'O NanoUrls é um encurtador de links completo, rápido e seguro. Ele foi projetado para encurtar suas URLs, gerar códigos QR dinâmicos e fornecer estatísticas detalhadas de cliques em tempo real.',
+          Text(
+            context.l10n('about_dialog_desc'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'SplineSans',
               color: AppColors.textMuted,
               fontSize: 14.0,
@@ -97,10 +98,10 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           const SizedBox(height: 16.0),
 
           // Details List
-          _buildDetailRow(Icons.offline_bolt_outlined, 'Performance otimizada'),
-          _buildDetailRow(Icons.security_outlined, 'Segurança de credenciais'),
-          _buildDetailRow(Icons.qr_code_2_outlined, 'QR Code integrado'),
-          _buildDetailRow(Icons.analytics_outlined, 'Relatórios de cliques e geolocalização'),
+          _buildDetailRow(Icons.offline_bolt_outlined, context.l10n('about_feature_performance')),
+          _buildDetailRow(Icons.security_outlined, context.l10n('about_feature_security')),
+          _buildDetailRow(Icons.qr_code_2_outlined, context.l10n('about_feature_qr')),
+          _buildDetailRow(Icons.analytics_outlined, context.l10n('about_feature_analytics')),
 
           const SizedBox(height: 24.0),
           
@@ -117,15 +118,15 @@ class AboutNanoUrlsDialog extends StatelessWidget {
                   borderRadius: BorderRadius.circular(9999),
                 ),
               ),
-              child: const Text('Fechar'),
+              child: Text(context.l10n('close')),
             ),
           ),
           const SizedBox(height: 12.0),
           
           // Footer
-          const Text(
-            '© 2026 NanoUrls. Todos os direitos reservados.',
-            style: TextStyle(
+          Text(
+            context.l10n('about_dialog_copyright'),
+            style: const TextStyle(
               fontFamily: 'SplineSans',
               color: Colors.white38,
               fontSize: 11.0,

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 // Splash Screen displaying the SVG logo with premium pulsing animations
 class SplashScreen extends StatefulWidget {
@@ -99,7 +100,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         arguments: emailToPrefill != null
             ? {
                 'email': emailToPrefill,
-                'error': loginError ?? 'Sua sessão expirou. Por favor, conecte-se novamente.',
+                'error': loginError ?? context.l10n('auto_login_failed'),
               }
             : null,
       );
@@ -208,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   
                   // Subtitle description matching site headers
                   Text(
-                    'Encurte seus links com estilo',
+                    context.l10n('splash_tagline'),
                     style: TextStyle(
                       fontSize: 14.0,
                       color: Colors.white.withOpacity(0.4),

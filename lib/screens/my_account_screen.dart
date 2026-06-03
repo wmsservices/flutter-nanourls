@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../entities/plan.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../services/crypto_service.dart';
@@ -91,7 +92,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       });
     } catch (e) {
       setState(() {
-        _planError = 'Erro ao carregar detalhes do plano.';
+        _planError = context.l10n('plan_error');
         _isLoadingPlan = false;
       });
     }
@@ -144,7 +145,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+              child: Text(context.l10n('cancel'), style: const TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
@@ -180,7 +181,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
     if (!isEmailChange && !isNameChange) {
       setState(() {
-        _profileSuccessMessage = 'Dados salvos com sucesso (sem alterações).';
+        _profileSuccessMessage = context.l10n('profile_success_no_changes');
         _profileErrorMessage = null;
       });
       return;
@@ -189,11 +190,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     final currentPassword = await showDialog<String>(
       context: context,
       builder: (context) => ConfirmActionDialog(
-        title: 'Salvar Alterações?',
+        title: context.l10n('save_profile_dialog_title'),
         message: isEmailChange
-            ? 'Você está alterando o seu e-mail. Por segurança, você será desconectado e precisará fazer login novamente com o novo e-mail. Confirmar?'
-            : 'Deseja realmente salvar as alterações no seu perfil?',
-        confirmText: 'Confirmar',
+            ? context.l10n('save_profile_dialog_message_email')
+            : context.l10n('save_profile_dialog_message_normal'),
+        confirmText: context.l10n('confirm'),
       ),
     );
 
@@ -211,7 +212,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       await _apiService.signIn(decryptedEmail, currentPassword);
     } catch (_) {
       setState(() {
-        _profileErrorMessage = 'A senha informada está incorreta.';
+        _profileErrorMessage = context.l10n('confirm_action_dialog_wrong_password');
         _isProfileSaving = false;
       });
       return;
@@ -234,8 +235,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
         } catch (_) {}
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('E-mail alterado com sucesso! Por favor, faça login com a nova credencial.'),
+            SnackBar(
+              content: Text(context.l10n('email_changed_success_snackbar')),
               backgroundColor: AppColors.primary,
             ),
           );
@@ -245,7 +246,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       }
 
       setState(() {
-        _profileSuccessMessage = 'Perfil atualizado com sucesso!';
+        _profileSuccessMessage = context.l10n('profile_success_updated');
         _isProfileSaving = false;
       });
     } catch (e) {
@@ -265,15 +266,15 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
     if (_currentPasswordController.text == _newPasswordController.text) {
       setState(() {
-        _passwordErrorMessage = 'A nova senha deve ser diferente da atual.';
+        _passwordErrorMessage = context.l10n('password_validation_different');
       });
       return;
     }
 
     final confirm = await _showConfirmDialog(
-      title: 'Alterar Senha?',
-      message: 'Deseja realmente alterar a sua senha de acesso?',
-      confirmText: 'Alterar',
+      title: context.l10n('change_password_dialog_title'),
+      message: context.l10n('change_password_dialog_message'),
+      confirmText: context.l10n('change_password_dialog_btn'),
     );
 
     if (!confirm) return;
@@ -290,7 +291,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       await _apiService.signIn(decryptedEmail, _currentPasswordController.text);
     } catch (_) {
       setState(() {
-        _passwordErrorMessage = 'A senha atual informada está incorreta.';
+        _passwordErrorMessage = context.l10n('confirm_action_dialog_wrong_password');
         _isPasswordSaving = false;
       });
       return;
@@ -316,8 +317,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Senha alterada com sucesso! Por segurança, faça login novamente.'),
+          SnackBar(
+            content: Text(context.l10n('password_changed_success_snackbar')),
             backgroundColor: AppColors.primary,
           ),
         );
@@ -335,10 +336,10 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   Future<void> _deleteAccount() async {
     final currentPassword = await showDialog<String>(
       context: context,
-      builder: (context) => const ConfirmActionDialog(
-        title: 'Excluir Conta?',
-        message: 'Esta ação é irreversível. Todos os seus links encurtados, QR codes e históricos de cliques serão apagados para sempre. Tem certeza absoluta?',
-        confirmText: 'Sim, Excluir',
+      builder: (context) => ConfirmActionDialog(
+        title: context.l10n('delete_account_dialog_title'),
+        message: context.l10n('delete_account_dialog_message'),
+        confirmText: context.l10n('delete_account_dialog_btn'),
         isDanger: true,
       ),
     );
@@ -359,8 +360,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A senha informada está incorreta.'),
+          SnackBar(
+            content: Text(context.l10n('confirm_action_dialog_wrong_password')),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -375,8 +376,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       await _apiService.deleteAccount();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sua conta foi excluída permanentemente.'),
+          SnackBar(
+            content: Text(context.l10n('delete_account_success_snackbar')),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -386,7 +387,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao excluir conta: ${e.toString()}'),
+            content: Text('${context.l10n('error')}: ${e.toString()}'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -410,7 +411,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Minha Conta'),
+        title: Text(context.l10n('account_settings_title')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -464,7 +465,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                     ),
                     const SizedBox(height: 16.0),
                     Text(
-                      user?.userName ?? 'Usuário',
+                      user?.userName ?? context.l10n('user'),
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 4.0),
@@ -478,7 +479,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Membro desde', style: TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                        Text(context.l10n('member_since'), style: const TextStyle(fontSize: 14, color: AppColors.textMuted)),
                         Text(
                           memberSinceStr,
                           style: const TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'SplineSans', fontWeight: FontWeight.bold),
@@ -508,11 +509,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.badge, color: AppColors.textMuted),
-                          SizedBox(width: 8.0),
-                          Text('Dados Pessoais', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const Icon(Icons.badge, color: AppColors.textMuted),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('personal_data_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
                       ),
                       const SizedBox(height: 20.0),
@@ -526,37 +527,37 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         const SizedBox(height: 12.0),
                       ],
 
-                      const Text('Nome de Usuário', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(context.l10n('username_label'), style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8.0),
                       TextFormField(
                         controller: _nameController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline),
-                          hintText: 'Digite seu nome',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.person_outline),
+                          hintText: context.l10n('username_hint'),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) return 'O nome é obrigatório.';
-                          if (value.trim().length > 50) return 'O nome deve ter no máximo 50 caracteres.';
+                          if (value == null || value.trim().isEmpty) return context.l10n('profile_validation_username_empty');
+                          if (value.trim().length > 50) return context.l10n('profile_validation_username_long');
                           return null;
                         },
                       ),
                       const SizedBox(height: 20.0),
 
-                      const Text('E-mail', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(context.l10n('email_label'), style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8.0),
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email_outlined),
-                          hintText: 'exemplo@email.com',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          hintText: context.l10n('email_hint'),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) return 'O e-mail é obrigatório.';
+                          if (value == null || value.trim().isEmpty) return context.l10n('email_validation_empty');
                           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-                            return 'E-mail inválido.';
+                            return context.l10n('email_validation_invalid');
                           }
                           return null;
                         },
@@ -577,12 +578,12 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Row(
+                              : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.save, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('Salvar Alterações'),
+                                    const Icon(Icons.save, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(context.l10n('save_changes')),
                                   ],
                                 ),
                         ),
@@ -607,11 +608,11 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      Row(
                         children: [
-                          Icon(Icons.lock, color: AppColors.textMuted),
-                          SizedBox(width: 8.0),
-                          Text('Segurança', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                          const Icon(Icons.lock, color: AppColors.textMuted),
+                          const SizedBox(width: 8.0),
+                          Text(context.l10n('security_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                         ],
                       ),
                       const SizedBox(height: 20.0),
@@ -625,7 +626,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         const SizedBox(height: 12.0),
                       ],
 
-                      const Text('Senha Atual', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(context.l10n('current_password_label'), style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8.0),
                       TextFormField(
                         controller: _currentPasswordController,
@@ -633,20 +634,20 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
-                          hintText: 'Sua senha atual',
+                          hintText: context.l10n('current_password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(_obscureCurrentPass ? Icons.visibility_off : Icons.visibility),
                             onPressed: () => setState(() => _obscureCurrentPass = !_obscureCurrentPass),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Informe a senha atual.';
+                          if (value == null || value.isEmpty) return context.l10n('current_password_validation_empty');
                           return null;
                         },
                       ),
                       const SizedBox(height: 20.0),
 
-                      const Text('Nova Senha', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(context.l10n('new_password_label'), style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8.0),
                       TextFormField(
                         controller: _newPasswordController,
@@ -654,29 +655,29 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
-                          hintText: 'Nova senha forte',
+                          hintText: context.l10n('new_password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(_obscureNewPass ? Icons.visibility_off : Icons.visibility),
                             onPressed: () => setState(() => _obscureNewPass = !_obscureNewPass),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Informe a nova senha.';
-                          if (value.length < 8) return 'A senha deve ter no mínimo 8 caracteres.';
+                          if (value == null || value.isEmpty) return context.l10n('new_password_validation_empty');
+                          if (value.length < 8) return context.l10n('new_password_validation_weak');
                           if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$').hasMatch(value)) {
-                            return 'A senha deve conter Maiúscula, Minúscula, Número e Especial.';
+                            return context.l10n('new_password_validation_weak');
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 8.0),
-                      const Text(
-                        'A senha deve conter: Maiúscula, Minúscula, Número e Especial (@\$!%*?&). Mínimo de 8 caracteres.',
-                        style: TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.3),
+                      Text(
+                        context.l10n('new_password_validation_weak'),
+                        style: const TextStyle(fontSize: 11, color: AppColors.textMuted, height: 1.3),
                       ),
                       const SizedBox(height: 20.0),
 
-                      const Text('Confirmar Nova Senha', style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
+                      Text(context.l10n('confirm_password_label'), style: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.white)),
                       const SizedBox(height: 8.0),
                       TextFormField(
                         controller: _confirmPasswordController,
@@ -684,16 +685,16 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_reset),
-                          hintText: 'Repita a nova senha',
+                          hintText: context.l10n('confirm_password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(_obscureConfirmPass ? Icons.visibility_off : Icons.visibility),
                             onPressed: () => setState(() => _obscureConfirmPass = !_obscureConfirmPass),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) return 'Confirme a nova senha.';
+                          if (value == null || value.isEmpty) return context.l10n('confirm_new_password_validation_empty');
                           if (value != _newPasswordController.text) {
-                            return 'As senhas informadas não conferem.';
+                            return context.l10n('confirm_new_password_validation_match');
                           }
                           return null;
                         },
@@ -714,12 +715,12 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Row(
+                              : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.key, size: 18),
-                                    SizedBox(width: 8),
-                                    Text('Alterar Senha'),
+                                    const Icon(Icons.key, size: 18),
+                                    const SizedBox(width: 8),
+                                    Text(context.l10n('change_password_btn')),
                                   ],
                                 ),
                         ),
@@ -742,17 +743,17 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.warning, color: Colors.redAccent),
-                        SizedBox(width: 8.0),
-                        Text('Zona de Perigo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                        const Icon(Icons.warning, color: Colors.redAccent),
+                        const SizedBox(width: 8.0),
+                        Text(context.l10n('danger_zone_title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.redAccent)),
                       ],
                     ),
                     const SizedBox(height: 8.0),
-                    const Text(
-                      'Excluir sua conta permanentemente é uma ação definitiva que removerá todos os seus links curtos, históricos e configurações. Não é possível recuperar os dados.',
-                      style: TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4),
+                    Text(
+                      context.l10n('danger_zone_desc'),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textMuted, height: 1.4),
                     ),
                     const SizedBox(height: 20.0),
                     SizedBox(
@@ -785,12 +786,12 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                                   strokeWidth: 2.5,
                                 ),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.delete_forever, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Excluir Conta'),
+                                  const Icon(Icons.delete_forever, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(context.l10n('delete_account_btn')),
                                 ],
                               ),
                       ),
@@ -837,7 +838,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                _planError ?? 'Erro ao carregar dados do plano.',
+                _planError ?? context.l10n('plan_error'),
                 style: const TextStyle(color: Colors.redAccent),
               ),
             ),
@@ -847,8 +848,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     }
 
     final plan = _plan!;
-    final linksStr = plan.maxLinks == -1 ? 'Links Ilimitados' : 'Até ${plan.maxLinks} links';
-    final analyticsStr = plan.maxAnalytics == -1 ? 'Cliques rastreados ilimitados' : 'Até ${plan.maxAnalytics} cliques rastreados';
+    final linksStr = plan.maxLinks == -1 ? context.l10n('unlimited_links') : context.l10n('max_links_limit', args: [plan.maxLinks]);
+    final analyticsStr = plan.maxAnalytics == -1 ? context.l10n('unlimited_analytics') : context.l10n('max_analytics_limit', args: [plan.maxAnalytics]);
 
     return Container(
       width: double.infinity,
@@ -868,9 +869,9 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'PLANO ATUAL',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.2),
+              Text(
+                context.l10n('plan_current'),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.2),
               ),
               Icon(Icons.rocket_launch, color: AppColors.primary.withOpacity(0.5)),
             ],
@@ -883,10 +884,10 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
           const SizedBox(height: 16.0),
           _buildPlanFeatureRow(linksStr),
           _buildPlanFeatureRow(analyticsStr),
-          if (plan.hasDetailedAnalytics) _buildPlanFeatureRow('Geolocalização nos relatórios'),
-          if (plan.hasCustomDomain) _buildPlanFeatureRow('Domínios personalizados'),
-          if (plan.hasCustomQrCode) _buildPlanFeatureRow('QR Code customizado'),
-          if (plan.hasApiAccess) _buildPlanFeatureRow('Acesso à API para desenvolvedores'),
+          if (plan.hasDetailedAnalytics) _buildPlanFeatureRow(context.l10n('features_geo')),
+          if (plan.hasCustomDomain) _buildPlanFeatureRow(context.l10n('features_domain')),
+          if (plan.hasCustomQrCode) _buildPlanFeatureRow(context.l10n('features_qr')),
+          if (plan.hasApiAccess) _buildPlanFeatureRow(context.l10n('features_api')),
         ],
       ),
     );
@@ -911,12 +912,16 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   }
 
   String _getMonthName(int month) {
-    const months = [
-      'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-      'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
-    ];
+    final locale = Localizations.localeOf(context).languageCode;
+    const months = {
+      'en': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      'pt': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+      'es': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+      'fr': ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'],
+    };
+    final list = months[locale] ?? months['en']!;
     if (month >= 1 && month <= 12) {
-      return months[month - 1];
+      return list[month - 1];
     }
     return '';
   }

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class ConfirmActionDialog extends StatefulWidget {
   final String title;
   final String message;
-  final String confirmText;
+  final String? confirmText;
   final bool isDanger;
 
   const ConfirmActionDialog({
     super.key,
     required this.title,
     required this.message,
-    this.confirmText = 'Confirmar',
+    this.confirmText,
     this.isDanger = false,
   });
 
@@ -32,6 +33,8 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedConfirmText = widget.confirmText ?? context.l10n('confirm');
+
     return AlertDialog(
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
@@ -69,9 +72,9 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
               style: const TextStyle(color: Colors.white70, fontSize: 14.0),
             ),
             const SizedBox(height: 20.0),
-            const Text(
-              'Confirme sua senha para prosseguir:',
-              style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white70),
+            Text(
+              context.l10n('confirm_action_dialog_message'),
+              style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white70),
             ),
             const SizedBox(height: 8.0),
             TextFormField(
@@ -80,7 +83,7 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.lock_outline),
-                hintText: 'Senha de acesso',
+                hintText: context.l10n('confirm_action_dialog_password_prompt'),
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
@@ -88,7 +91,7 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'A senha é obrigatória para confirmar.';
+                  return context.l10n('confirm_action_dialog_password_empty');
                 }
                 return null;
               },
@@ -99,7 +102,7 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, null),
-          child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+          child: Text(context.l10n('cancel'), style: const TextStyle(color: Colors.white70)),
         ),
         ElevatedButton(
           onPressed: () {
@@ -118,7 +121,7 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
               borderRadius: BorderRadius.circular(9999),
             ),
           ),
-          child: Text(widget.confirmText),
+          child: Text(resolvedConfirmText),
         ),
       ],
     );

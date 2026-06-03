@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 // Sign-Up screen allowing new users to register an account
 class SignUpScreen extends StatefulWidget {
@@ -81,7 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Não foi possível abrir o link: $urlString'),
+            content: Text('${context.l10n('error')}: $urlString'),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -113,10 +114,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   String _getStrengthText() {
-    if (_passwordController.text.isEmpty) return 'Senha fraca';
-    if (_passwordScore < 3) return 'Senha fraca';
-    if (_passwordScore < 5) return 'Senha Média';
-    return 'Senha Forte';
+    if (_passwordController.text.isEmpty) return context.l10n('strength_weak');
+    if (_passwordScore < 3) return context.l10n('strength_weak');
+    if (_passwordScore < 5) return context.l10n('strength_medium');
+    return context.l10n('strength_strong');
   }
 
   // Handle registration form submission
@@ -159,13 +160,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderRadius: BorderRadius.circular(16.0),
                 side: const BorderSide(color: AppColors.border),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.check_circle_outline, color: AppColors.primary, size: 28),
-                  SizedBox(width: 8),
+                  const Icon(Icons.check_circle_outline, color: AppColors.primary, size: 28),
+                  const SizedBox(width: 8),
                   Text(
-                    'Sucesso!',
-                    style: TextStyle(
+                    context.l10n('signup_success_title'),
+                    style: const TextStyle(
                       fontFamily: 'SplineSans',
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -174,27 +175,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ],
               ),
-              content: RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontFamily: 'SplineSans',
-                    color: AppColors.textMuted,
-                    fontSize: 14.0,
-                    height: 1.5,
-                  ),
-                  children: [
-                    const TextSpan(text: 'Parabéns, sua conta '),
-                    const TextSpan(
-                      text: 'NanoUrls',
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ' foi criada com sucesso! Enviamos um e-mail para '),
-                    TextSpan(
-                      text: userEmail,
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ', caso não encontre na caixa de entrada, por favor verifique no Lixo Eletrônico.'),
-                  ],
+              content: Text(
+                context.l10n('signup_success_message', args: [userEmail]),
+                style: const TextStyle(
+                  fontFamily: 'SplineSans',
+                  color: AppColors.textMuted,
+                  fontSize: 14.0,
+                  height: 1.5,
                 ),
               ),
               actions: [
@@ -262,19 +249,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: SvgPicture.asset('assets/svg/logo.svg'),
                     ),
                     const SizedBox(height: 24.0),
-                    const Text(
-                      'Criar Conta',
-                      style: TextStyle(
-                        fontFamily: 'SplineSans',
-                        fontSize: 32.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(
+                          fontFamily: 'SplineSans',
+                          fontSize: 32.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          height: 1.15,
+                        ),
+                        children: [
+                          TextSpan(text: context.l10n('signup_header_title')),
+                          TextSpan(
+                            text: 'NanoUrls',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              shadows: [
+                                Shadow(
+                                  color: AppColors.shadowGlow,
+                                  blurRadius: 15.0,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8.0),
-                    const Text(
-                      'Registre-se para encurtar e gerenciar seus links com estilo.',
-                      style: TextStyle(
+                    Text(
+                      context.l10n('splash_tagline'),
+                      style: const TextStyle(
                         fontFamily: 'SplineSans',
                         fontSize: 14.0,
                         color: AppColors.textMuted,
@@ -291,9 +295,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Nome Input
-                      const Text(
-                        'Nome de Usuário',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('username_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -303,19 +307,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       TextFormField(
                         controller: _nameController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.person_outline),
-                          hintText: 'Digite seu nome',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.person_outline),
+                          hintText: context.l10n('username_hint'),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'O nome/apelido é obrigatório.';
+                            return context.l10n('username_validation_empty');
                           }
                           if (value.trim().length > 36) {
-                            return 'O nome deve ter no máximo 36 caracteres.';
+                            return context.l10n('profile_validation_username_long');
                           }
                           if (!RegExp(r'^[a-zA-Z0-9\s_-]*$').hasMatch(value)) {
-                            return 'O nome deve conter apenas letras (sem acentos), números, espaços, hífen (-) e underscore (_).';
+                            return context.l10n('username_validation_invalid');
                           }
                           return null;
                         },
@@ -323,9 +327,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20.0),
 
                       // Email Input
-                      const Text(
-                        'Endereço de E-mail',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('email_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -336,16 +340,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email_outlined),
-                          hintText: 'exemplo@email.com',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          hintText: context.l10n('email_hint'),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Por favor, insira seu e-mail.';
+                            return context.l10n('email_validation_empty');
                           }
                           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-                            return 'Por favor, insira um e-mail válido.';
+                            return context.l10n('email_validation_invalid');
                           }
                           return null;
                         },
@@ -353,9 +357,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20.0),
 
                       // Senha Input
-                      const Text(
-                        'Senha de Acesso',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('password_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -368,7 +372,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
-                          hintText: 'Crie uma senha forte',
+                          hintText: context.l10n('password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -382,13 +386,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'A senha é obrigatória.';
+                            return context.l10n('password_validation_empty');
                           }
                           if (value.length < 8 || value.length > 36) {
-                            return 'A senha deve ter entre 8 e 36 caracteres.';
+                            return context.l10n('new_password_validation_weak');
                           }
                           if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,36}$').hasMatch(value)) {
-                            return 'A senha deve conter: Maiúscula, Minúscula, Número e Especial (@\$!%*?&).';
+                            return context.l10n('new_password_validation_weak');
                           }
                           return null;
                         },
@@ -434,9 +438,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               fontWeight: _passwordScore >= 5 ? FontWeight.bold : FontWeight.normal,
                             ),
                           ),
-                          const Text(
-                            'Regras de segurança',
-                            style: TextStyle(
+                          Text(
+                            context.l10n('security_rules'),
+                            style: const TextStyle(
                               fontSize: 12.0,
                               color: AppColors.textMuted,
                             ),
@@ -444,9 +448,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ],
                       ),
                       const SizedBox(height: 4.0),
-                      const Text(
-                        'Caracteres Especiais Permitidos: @ \$ ! % * ? &',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('special_chars_legend'),
+                        style: const TextStyle(
                           fontSize: 12.0,
                           color: AppColors.textMuted,
                         ),
@@ -454,9 +458,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       const SizedBox(height: 20.0),
 
                       // Confirmar Senha Input
-                      const Text(
-                        'Confirmar Senha',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('confirm_password_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -469,7 +473,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_reset_outlined),
-                          hintText: 'Repita a senha',
+                          hintText: context.l10n('confirm_password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
@@ -483,10 +487,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'A confirmação de senha é obrigatória.';
+                            return context.l10n('confirm_password_validation_empty');
                           }
                           if (value != _passwordController.text) {
-                            return 'As senhas informadas não conferem.';
+                            return context.l10n('confirm_password_validation_match');
                           }
                           return null;
                         },
@@ -567,7 +571,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                text: 'Li e concordo com os ',
+                                text: context.l10n('agree_terms_start'),
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14.0,
@@ -576,7 +580,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 recognizer: _agreeTermsTextRecognizer,
                                 children: [
                                   TextSpan(
-                                    text: 'Termos de Uso',
+                                    text: context.l10n('agree_terms_link'),
                                     style: const TextStyle(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.bold,
@@ -613,7 +617,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           Expanded(
                             child: RichText(
                               text: TextSpan(
-                                text: 'Li e concordo com a ',
+                                text: context.l10n('agree_privacy_start'),
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14.0,
@@ -622,7 +626,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 recognizer: _agreePrivacyTextRecognizer,
                                 children: [
                                   TextSpan(
-                                    text: 'Política de Privacidade',
+                                    text: context.l10n('agree_privacy_link'),
                                     style: const TextStyle(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.bold,
@@ -653,7 +657,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text('Criar Conta'),
+                              : Text(context.l10n('sign_up_btn')),
                         ),
                       ),
                       const SizedBox(height: 24.0),
@@ -668,17 +672,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             foregroundColor: Colors.white70,
                           ),
                           child: RichText(
-                            text: const TextSpan(
-                              text: 'Já tem uma conta? ',
-                              style: TextStyle(
+                            text: TextSpan(
+                              text: context.l10n('already_have_account') + ' ',
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontFamily: 'SplineSans',
                                 fontSize: 14.0,
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'Entrar.',
-                                  style: TextStyle(
+                                  text: context.l10n('login_here'),
+                                  style: const TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
                                   ),

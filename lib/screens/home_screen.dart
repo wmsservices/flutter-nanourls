@@ -5,6 +5,7 @@ import '../entities/nano_url.dart';
 import '../components/url_card.dart';
 import '../components/qr_code_dialog.dart';
 import '../components/about_dialog.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
@@ -98,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao carregar dados da API: $_apiError'),
+            content: Text('${context.l10n('error')}: $_apiError'),
             backgroundColor: Colors.red[800],
             duration: const Duration(seconds: 4),
           ),
@@ -128,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = _sessionManager.currentUser;
     if (user != null && !user.enabled) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sua conta está desativada. Confirme seu e-mail para habilitá-la.'),
+        SnackBar(
+          content: Text(context.l10n('account_disabled_snackbar')),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -145,8 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _addNewShortenedUrl(result);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('NanoUrl criada com sucesso!'),
+        SnackBar(
+          content: Text(context.l10n('create_success_snackbar')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -170,8 +171,8 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Configurações salvas com sucesso!'),
+        SnackBar(
+          content: Text(context.l10n('update_success_snackbar')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -227,9 +228,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('"${url.shortUrl}" enviado para a lixeira.'),
+              content: Text(context.l10n('delete_success_snackbar')),
               action: SnackBarAction(
-                label: 'DESFAZER',
+                label: context.l10n('undo'),
                 textColor: AppColors.textLight,
                 onPressed: () => _restoreUrl(updatedUrl),
               ),
@@ -241,7 +242,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Erro ao enviar para a lixeira: ${e.toString().replaceAll('HttpException: ', '')}'),
+              content: Text(context.l10n('delete_error_snackbar', args: [e.toString().replaceAll('HttpException: ', '')])),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -258,24 +259,24 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(16.0),
               side: const BorderSide(color: AppColors.border),
             ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
-                SizedBox(width: 8),
+                const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
+                const SizedBox(width: 8),
                 Text(
-                  'Confirmar Exclusão',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.0),
+                  context.l10n('delete_trash_confirm_title'),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.0),
                 ),
               ],
             ),
             content: Text(
-              'Esta ação é irreversível e o redirecionamento para "${url.shortUrl}" deixará de funcionar imediatamente. Deseja continuar?',
+              context.l10n('delete_trash_confirm_message'),
               style: const TextStyle(color: AppColors.textMuted, fontSize: 14.0),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar', style: TextStyle(color: Colors.white70)),
+                child: Text(context.l10n('cancel'), style: const TextStyle(color: Colors.white70)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -283,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('Excluir'),
+                child: Text(context.l10n('delete')),
               ),
             ],
           );
@@ -300,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _urls.removeWhere((u) => u.shortUrl == url.shortUrl);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('"${url.shortUrl}" excluído permanentemente.'),
+                content: Text(context.l10n('delete_success_snackbar')),
                 backgroundColor: Colors.redAccent,
               ),
             );
@@ -309,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Erro ao excluir: ${e.toString().replaceAll('HttpException: ', '')}'),
+                content: Text(context.l10n('delete_error_snackbar', args: [e.toString().replaceAll('HttpException: ', '')])),
                 backgroundColor: Colors.redAccent,
               ),
             );
@@ -365,8 +366,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Link restaurado com sucesso!'),
+        SnackBar(
+          content: Text(context.l10n('restore_success_snackbar')),
           backgroundColor: AppColors.primary,
         ),
       );
@@ -374,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao restaurar: ${e.toString().replaceAll('HttpException: ', '')}'),
+            content: Text(context.l10n('restore_error_snackbar', args: [e.toString().replaceAll('HttpException: ', '')])),
             backgroundColor: Colors.redAccent,
           ),
         );
@@ -439,11 +440,15 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 8.0),
-            Text(
-              _sessionManager.isAuthenticated 
-                  ? 'Olá, ${_sessionManager.currentUser?.userName}' 
-                  : 'Dashboard Demo',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            Expanded(
+              child: Text(
+                _sessionManager.isAuthenticated 
+                    ? context.l10n('hello_user', args: [_sessionManager.currentUser?.userName ?? '']) 
+                    : context.l10n('dashboard_demo'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ),
           ],
         ),
@@ -454,7 +459,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _isCompactViewMode ? Icons.view_stream : Icons.view_list,
               color: AppColors.primary,
             ),
-            tooltip: _isCompactViewMode ? 'Visualização completa' : 'Visualização compacta',
+            tooltip: _isCompactViewMode ? context.l10n('expanded_view_tooltip') : context.l10n('compact_view_tooltip'),
             onPressed: () async {
               setState(() {
                 _isCompactViewMode = !_isCompactViewMode;
@@ -471,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_sessionManager.isAuthenticated)
             IconButton(
               icon: const Icon(Icons.manage_accounts, color: AppColors.primary),
-              tooltip: 'Minha Conta',
+              tooltip: context.l10n('account_settings_title'),
               onPressed: () {
                 Navigator.of(context).pushNamed('/account');
               },
@@ -480,12 +485,13 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_sessionManager.isAuthenticated)
             IconButton(
               icon: const Icon(Icons.refresh, color: AppColors.primary),
+              tooltip: context.l10n('refresh_tooltip'),
               onPressed: _loadDashboardData,
             ),
           // Logout button styled matching card mode & refresh
           IconButton(
             icon: const Icon(Icons.logout, color: AppColors.primary),
-            tooltip: 'Sair',
+            tooltip: context.l10n('logout_tooltip'),
             onPressed: () {
               _sessionManager.clearSession();
               Navigator.of(context).pushReplacementNamed('/login');
@@ -504,10 +510,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Icon(Icons.warning_amber_rounded, color: Colors.white, size: 20),
                   const SizedBox(width: 10),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Por favor, confirme seu e-mail para ativar sua conta e liberar todas as funções. Toque em Atualizar após confirmar.',
-                      style: TextStyle(color: Colors.white, fontSize: 13.0, fontWeight: FontWeight.w500),
+                      context.l10n('account_disabled_warning'),
+                      style: const TextStyle(color: Colors.white, fontSize: 13.0, fontWeight: FontWeight.w500),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -519,9 +525,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       minimumSize: const Size(0, 0),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
-                    child: const Text(
-                      'Atualizar',
-                      style: TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                    child: Text(
+                      context.l10n('update_btn'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
                     ),
                   ),
                 ],
@@ -544,17 +550,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     _showTrashOnly
                         ? Text.rich(
-                            const TextSpan(
-                              text: 'Modo ',
-                              style: TextStyle(
+                            TextSpan(
+                              text: context.l10n('trash_title'),
+                              style: const TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'Lixeira',
-                                  style: TextStyle(
+                                  text: context.l10n('trash_title_highlight'),
+                                  style: const TextStyle(
                                     color: Colors.redAccent,
                                   ),
                                 ),
@@ -563,7 +569,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           )
                         : Text.rich(
                             TextSpan(
-                              text: 'Minhas ',
+                              text: context.l10n('dashboard_title'),
                               style: const TextStyle(
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
@@ -587,7 +593,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildStatBadge(
                             icon: SvgPicture.asset('assets/svg/logo.svg', width: 14, height: 14),
                             count: '$_urlsLeft',
-                            tooltip: 'Links disponíveis',
+                            tooltip: context.l10n('links_available', args: [_urlsLeft]),
                           ),
                         ),
                         const SizedBox(width: 10.0),
@@ -595,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildStatBadge(
                             icon: const Icon(Icons.bar_chart, color: AppColors.primary, size: 16),
                             count: '$_analyticsLeft',
-                            tooltip: 'Analytics liberados',
+                            tooltip: context.l10n('analytics_unlocked', args: [_analyticsLeft]),
                           ),
                         ),
                         const SizedBox(width: 10.0),
@@ -613,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 size: 16,
                               ),
                               count: '$_trashCount',
-                              tooltip: 'Lixeira',
+                              tooltip: context.l10n('trash_mode_btn', args: [_trashCount]),
                               isActive: _showTrashOnly,
                             ),
                           ),
@@ -630,7 +636,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText: 'Pesquise pelo link ou descrição...',
+                        hintText: context.l10n('search_hint'),
                         prefixIcon: const Icon(Icons.search),
                         fillColor: AppColors.surfaceInner,
                         border: OutlineInputBorder(
@@ -691,8 +697,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 16.0),
                         Text(
                           _searchQuery.isNotEmpty 
-                              ? 'Nenhum resultado encontrado' 
-                              : (_showTrashOnly ? 'Lixeira vazia!' : 'Você não possui links criados'),
+                              ? context.l10n('empty_urls_title_search') 
+                              : (_showTrashOnly ? context.l10n('empty_trash_title') : context.l10n('empty_urls_title')),
                           style: const TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.bold,
@@ -702,8 +708,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 6.0),
                         Text(
                           _searchQuery.isNotEmpty 
-                              ? 'Tente alterar os termos ou filtros de pesquisa.' 
-                              : (_showTrashOnly ? 'Links movidos para a lixeira aparecerão aqui.' : 'Cole um link longo na caixa acima para encurtar.'),
+                              ? context.l10n('empty_urls_desc_search') 
+                              : (_showTrashOnly ? context.l10n('empty_urls_desc_trash') : context.l10n('empty_urls_desc')),
                           style: const TextStyle(
                             fontSize: 13.0,
                             color: AppColors.textMuted,
@@ -841,7 +847,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Icon(Icons.grid_view, color: AppColors.primary, size: 18),
                   const SizedBox(width: 8.0),
                   Text(
-                    'Todos',
+                    context.l10n('filter_all_glyphs'),
                     style: TextStyle(
                       color: _selectedGlyphFilter == 'todos' ? AppColors.primary : Colors.white70,
                       fontSize: 14.0,
@@ -853,7 +859,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ...GlyphHelper.availableGlyphs.map((String glyph) {
               final icon = GlyphHelper.getIconData(glyph);
-              final displayName = GlyphHelper.getGlyphLabel(glyph);
+              final displayName = GlyphHelper.getGlyphLabel(glyph, context);
               final isSelected = _selectedGlyphFilter == glyph;
               return DropdownMenuItem<String>(
                 value: glyph,
@@ -909,7 +915,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 8.0),
             Text(
-              'Protegidos',
+              context.l10n('filter_protected_only'),
               style: TextStyle(
                 color: isSelected ? AppColors.primary : Colors.white70,
                 fontSize: 14.0,
