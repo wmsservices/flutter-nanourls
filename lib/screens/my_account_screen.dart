@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../entities/plan.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
@@ -225,6 +226,12 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       if (isEmailChange) {
         // Force logout
         _sessionManager.clearSession();
+        // Clear saved credentials in SharedPreferences
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('saved_email');
+          await prefs.remove('saved_password');
+        } catch (_) {}
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -296,9 +303,26 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       _confirmPasswordController.clear();
 
       setState(() {
-        _passwordSuccessMessage = 'Senha atualizada com sucesso!';
         _isPasswordSaving = false;
       });
+
+      // Force logout after password change
+      _sessionManager.clearSession();
+      // Clear saved password in SharedPreferences
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('saved_password');
+      } catch (_) {}
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Senha alterada com sucesso! Por segurança, faça login novamente.'),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
     } catch (e) {
       setState(() {
         _passwordErrorMessage = e.toString().replaceAll('HttpException: ', '').replaceAll('Exception: ', '');

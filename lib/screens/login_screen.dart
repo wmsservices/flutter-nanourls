@@ -23,11 +23,30 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
   String? _errorMessage;
+  bool _argsLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _loadSavedCredentials();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_argsLoaded) {
+      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null) {
+        setState(() {
+          _emailController.text = args['email'] ?? '';
+          _errorMessage = args['error'];
+          _passwordController.clear();
+          _rememberMe = true;
+        });
+      } else {
+        _loadSavedCredentials();
+      }
+      _argsLoaded = true;
+    }
   }
 
   @override
@@ -245,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 12.0),
                       
                       // Remember me and Forgot password row
-                      Row(
+                      Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Row(

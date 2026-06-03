@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../entities/nano_url.dart';
 import '../components/url_card.dart';
 import '../components/qr_code_dialog.dart';
+import '../components/about_dialog.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
@@ -419,15 +420,23 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         title: Row(
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: AppColors.backgroundDarker,
-                shape: BoxShape.circle,
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => const AboutNanoUrlsDialog(),
+                );
+              },
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: AppColors.backgroundDarker,
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(6),
+                child: SvgPicture.asset('assets/svg/logo.svg'),
               ),
-              padding: const EdgeInsets.all(6),
-              child: SvgPicture.asset('assets/svg/logo.svg'),
             ),
             const SizedBox(width: 8.0),
             Text(

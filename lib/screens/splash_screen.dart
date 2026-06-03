@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
+import '../services/crypto_service.dart';
 import '../theme/app_theme.dart';
 
 // Splash Screen displaying the SVG logo with premium pulsing animations
@@ -42,12 +45,65 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Repeat the pulse back and forth
     _controller.repeat(reverse: true);
 
-    // Transition to Login screen after a short delay
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/login');
+    // Process auto-login check
+    _checkAutoLogin();
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final startTime = DateTime.now();
+    bool loginSuccess = false;
+    String? emailToPrefill;
+    String? loginError;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final remember = prefs.getBool('remember_me') ?? false;
+      if (remember) {
+        final encryptedEmail = prefs.getString('saved_email');
+        final encryptedPassword = prefs.getString('saved_password');
+        if (encryptedEmail != null && encryptedPassword != null) {
+          final crypto = CryptoService();
+          final email = crypto.decryptEmail(encryptedEmail);
+          final password = crypto.decryptPassword(encryptedPassword);
+          emailToPrefill = email;
+
+          // Attempt API sign in
+          final apiService = ApiService();
+          await apiService.signIn(email, password);
+          loginSuccess = true;
+        }
       }
-    });
+    } catch (e) {
+      loginError = e.toString().replaceAll('HttpException: ', '').replaceAll('Exception: ', '');
+      // Clear saved password on failure so we don't try again next time
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('saved_password');
+      } catch (_) {}
+    }
+
+    // Ensure splash screen is shown for at least 2500ms for premium feels
+    final elapsed = DateTime.now().difference(startTime);
+    final remainingDelay = const Duration(milliseconds: 2500) - elapsed;
+    if (remainingDelay > Duration.zero) {
+      await Future.delayed(remainingDelay);
+    }
+
+    if (!mounted) return;
+
+    if (loginSuccess) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      Navigator.of(context).pushReplacementNamed(
+        '/login',
+        arguments: emailToPrefill != null
+            ? {
+                'email': emailToPrefill,
+                'error': loginError ?? 'Sua sessão expirou. Por favor, conecte-se novamente.',
+              }
+            : null,
+      );
+    }
   }
 
   @override
