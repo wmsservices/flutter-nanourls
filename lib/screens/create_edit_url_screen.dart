@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../entities/nano_url.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
+import '../services/admob_controller.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
 import '../l10n/app_localizations.dart';
@@ -260,7 +261,10 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
         hasPassword: _checkPassword && (password == null || password.isNotEmpty),
       );
 
-      if (mounted) Navigator.pop(context, newUrl);
+      if (mounted) {
+        AdmobController.instance.trackAction(context);
+        Navigator.pop(context, newUrl);
+      }
     } catch (e) {
       if (mounted) {
         setState(() {

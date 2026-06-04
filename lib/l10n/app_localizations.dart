@@ -127,6 +127,7 @@ class AppLocalizations {
       'restore_success_snackbar': 'Link restored successfully!',
       'restore_error_snackbar': 'Error restoring link: {0}',
       'undo': 'Undo',
+      'ads_disabled_session': 'Ads disabled for this session!',
 
       // Create / Edit URL Screen
       'create_url_title': 'Create NanoUrl',
@@ -438,6 +439,7 @@ class AppLocalizations {
       'restore_success_snackbar': 'Link restaurado com sucesso!',
       'restore_error_snackbar': 'Erro ao restaurar link: {0}',
       'undo': 'Desfazer',
+      'ads_disabled_session': 'Anúncios desativados para esta sessão!',
 
       // Create / Edit URL Screen
       'create_url_title': 'Criar NanoUrl',
@@ -749,6 +751,7 @@ class AppLocalizations {
       'restore_success_snackbar': '¡Enlace restaurado con éxito!',
       'restore_error_snackbar': 'Error al restaurar enlace: {0}',
       'undo': 'Deshacer',
+      'ads_disabled_session': '¡Anuncios desactivados para esta sesión!',
 
       // Create / Edit URL Screen
       'create_url_title': 'Crear NanoUrl',
@@ -1060,6 +1063,7 @@ class AppLocalizations {
       'restore_success_snackbar': 'Lien restauré avec succès !',
       'restore_error_snackbar': 'Erreur lors de la restauration du lien : {0}',
       'undo': 'Annuler',
+      'ads_disabled_session': 'Publicités désactivées pour cette session !',
 
       // Create / Edit URL Screen
       'create_url_title': 'Créer une NanoUrl',

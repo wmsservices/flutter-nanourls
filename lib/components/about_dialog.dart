@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
+import '../services/admob_controller.dart';
 
 class AboutNanoUrlsDialog extends StatelessWidget {
   const AboutNanoUrlsDialog({super.key});
@@ -20,23 +21,39 @@ class AboutNanoUrlsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Logo with outer circle and neon glow
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              color: AppColors.backgroundDarker,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                  blurRadius: 16.0,
-                  spreadRadius: 2.0,
-                ),
-              ],
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+          GestureDetector(
+            onTap: () {
+              AdmobController.instance.incrementEasterEggTaps(
+                context,
+                () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(context.l10n('ads_disabled_session')),
+                      backgroundColor: AppColors.primary,
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                },
+              );
+            },
+            child: Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundDarker,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.15),
+                    blurRadius: 16.0,
+                    spreadRadius: 2.0,
+                  ),
+                ],
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+              ),
+              padding: const EdgeInsets.all(14),
+              child: SvgPicture.asset('assets/svg/logo.svg'),
             ),
-            padding: const EdgeInsets.all(14),
-            child: SvgPicture.asset('assets/svg/logo.svg'),
           ),
           const SizedBox(height: 18.0),
           

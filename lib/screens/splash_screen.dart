@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
+import '../services/admob_controller.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
@@ -45,6 +46,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // Repeat the pulse back and forth
     _controller.repeat(reverse: true);
+
+    // Initialize Mobile Ads SDK & Tracking Permissions
+    AdmobController.instance.init();
 
     // Process auto-login check
     _checkAutoLogin();

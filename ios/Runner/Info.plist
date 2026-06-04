@@ -70,5 +70,9 @@
 	<string>Este aplicativo precisa acessar a biblioteca de fotos para salvar o QR Code.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Este aplicativo precisa de permissão para adicionar imagens à biblioteca de fotos para salvar o QR Code.</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-4671549534107534~7766467070</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Este identificador será usado para fornecer anúncios personalizados para você.</string>
 </dict>
 </plist>

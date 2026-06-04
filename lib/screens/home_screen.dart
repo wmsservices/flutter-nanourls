@@ -8,6 +8,9 @@ import '../components/about_dialog.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
+import '../services/admob_controller.dart';
+import '../components/banner_ad_widget.dart';
+import '../components/native_ad_card.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
 
@@ -41,6 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadViewModePreference();
     _loadDashboardData();
+    AdmobController.instance.addListener(_onAdmobStateChange);
+  }
+
+  void _onAdmobStateChange() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    AdmobController.instance.removeListener(_onAdmobStateChange);
+    super.dispose();
   }
 
   Future<void> _loadViewModePreference() async {
@@ -415,6 +431,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }).toList();
   }
 
+  static const int _adInterval = 5;
+
+  bool _isAdIndex(int index, int filteredLength) {
+    if (AdmobController.instance.adsDisabled || filteredLength == 0) return false;
+    return index > 0 && (index + 1) % _adInterval == 0;
+  }
+
+  int _getUrlIndex(int index, int filteredLength) {
+    if (AdmobController.instance.adsDisabled) return index;
+    final adCount = (index + 1) ~/ _adInterval;
+    return index - adCount;
+  }
+
+  int _getListItemCount(int filteredLength) {
+    if (AdmobController.instance.adsDisabled || filteredLength == 0) {
+      return filteredLength;
+    }
+    return filteredLength + (filteredLength - 1) ~/ (_adInterval - 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredList = _filteredUrls;
@@ -716,7 +752,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      final item = filteredList[index];
+                      if (_isAdIndex(index, filteredList.length)) {
+                        return NativeAdCard(key: ValueKey('ad_$index'));
+                      }
+                      final urlIndex = _getUrlIndex(index, filteredList.length);
+                      if (urlIndex >= filteredList.length) {
+                        return const SizedBox.shrink();
+                      }
+                      final item = filteredList[urlIndex];
                       return UrlCard(
                         key: ValueKey(item.shortUrl),
                         url: item,
@@ -729,6 +772,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           );
                         },
                         onQrCode: () {
+                          // Track action for ad count
+                          AdmobController.instance.trackAction(context);
                           showDialog(
                             context: context,
                             builder: (context) => QrCodeDialog(url: item),
@@ -745,7 +790,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onRestore: () => _restoreUrl(item),
                       );
                     },
-                    childCount: filteredList.length,
+                    childCount: _getListItemCount(filteredList.length),
                   ),
                 ),
               ),
@@ -766,6 +811,16 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: _openCreateScreen,
         child:  SvgPicture.asset('assets/svg/black_logo.svg', width: 28, height: 28),
       ),
+      bottomNavigationBar: AdmobController.instance.adsDisabled
+          ? null
+          : const SafeArea(
+              child: SizedBox(
+                height: 50,
+                child: Center(
+                  child: BannerAdWidget(),
+                ),
+              ),
+            ),
     );
   }
 

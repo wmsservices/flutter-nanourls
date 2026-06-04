@@ -6,6 +6,7 @@ import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
 import '../helpers/glyph_helper.dart';
 import '../l10n/app_localizations.dart';
+import '../services/admob_controller.dart';
 
 // Card displaying shortened URL details, stats, and actions
 class UrlCard extends StatefulWidget {
@@ -52,6 +53,9 @@ class _UrlCardState extends State<UrlCard> {
   }
 
   void _shareLink(BuildContext context, String urlString) {
+    // Track user action to count for Interstitial Ad
+    AdmobController.instance.trackAction(context);
+
     final box = context.findRenderObject() as RenderBox?;
     final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
     SharePlus.instance.share(
