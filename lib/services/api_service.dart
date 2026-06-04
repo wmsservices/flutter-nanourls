@@ -31,23 +31,20 @@ class ApiService {
 
   static String? _cachedIp;
 
-  // Fetches the client's public IPv4 address from ipify using non-blocking background fetch
+  // Fetches the client's public IPv4 address from ipify, waiting for it if not cached
   Future<String> _getClientIp() async {
     if (_cachedIp != null) return _cachedIp!;
-    _fetchIpInBackground();
+    try {
+      final response = await http.get(Uri.parse('https://api.ipify.org'))
+          .timeout(const Duration(seconds: 3));
+      if (response.statusCode == 200) {
+        _cachedIp = response.body.trim();
+        return _cachedIp!;
+      }
+    } catch (_) {
+      // Fallback
+    }
     return '127.0.0.1';
-  }
-
-  void _fetchIpInBackground() {
-    http.get(Uri.parse('https://api.ipify.org'))
-        .timeout(const Duration(seconds: 3))
-        .then((response) {
-          if (response.statusCode == 200) {
-            _cachedIp = response.body.trim();
-          }
-        }).catchError((_) {
-          // Silent fallback
-        });
   }
 
   // Executes Sign-In POST request to /v1/user/signin with robust body and exception parsing

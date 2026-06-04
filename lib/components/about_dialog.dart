@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../services/admob_controller.dart';
@@ -80,22 +81,30 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           const SizedBox(height: 4.0),
           
           // Version Number
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(9999),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
-            ),
-            child: Text(
-              context.l10n('about_dialog_version'),
-              style: const TextStyle(
-                fontFamily: 'SplineSans',
-                fontSize: 12.0,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
-            ),
+          FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              final versionStr = snapshot.hasData 
+                  ? context.l10n('about_dialog_version', args: [snapshot.data!.version])
+                  : '...';
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(9999),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+                ),
+                child: Text(
+                  versionStr,
+                  style: const TextStyle(
+                    fontFamily: 'SplineSans',
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 20.0),
           
