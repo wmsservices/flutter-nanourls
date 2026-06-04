@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import '../entities/user.dart';
 import '../entities/nano_url.dart';
@@ -60,6 +61,22 @@ class ApiService {
     final ipAddress = await _getClientIp();
     final encryptedIp = ipAddress.contains(':') ? 'Unknow' : _cryptoService.encryptIpAddress(ipAddress);
 
+    // Extract unique device ID
+    String deviceId = 'Unknown';
+    try {
+      final deviceInfo = DeviceInfoPlugin();
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfo.androidInfo;
+        deviceId = androidInfo.id;
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfo.iosInfo;
+        deviceId = iosInfo.identifierForVendor ?? 'Unknown';
+      }
+    } catch (_) {
+      // Fallback
+    }
+    final encryptedDeviceId = _cryptoService.encryptDeviceId(deviceId);
+
     try {
       final platform = Platform.isIOS ? 'iOS' : Platform.isAndroid ? 'Android' : 'Unknown';
       final response = await http.post(
@@ -75,6 +92,7 @@ class ApiService {
           'ipAddress': encryptedIp,
           'userAgent': platform,
           'referer': 'mobile-app',
+          'deviceId': encryptedDeviceId,
         }),
       );
 

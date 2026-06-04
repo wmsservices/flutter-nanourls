@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/admob_controller.dart';
@@ -38,9 +39,13 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   void _loadAd() {
     if (AdmobController.instance.adsDisabled) return;
 
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/6300978111' // Android Test Banner ID
-        : 'ca-app-pub-3940256099942544/2934735716'; // iOS Test Banner ID
+    final adUnitId = kDebugMode
+        ? (Platform.isAndroid
+            ? 'ca-app-pub-3940256099942544/6300978111' // Android Test Banner ID
+            : 'ca-app-pub-3940256099942544/2934735716') // iOS Test Banner ID
+        : (Platform.isAndroid
+            ? 'ca-app-pub-4671549534107534/2685375257' // Android Prod Banner
+            : 'ca-app-pub-4671549534107534/5787701226'); // iOS Prod Banner
 
     _bannerAd = BannerAd(
       adUnitId: adUnitId,

@@ -1,4 +1,4 @@
-package com.nanourls.app.nanourls
+package com.nanourls.app
 
 import io.flutter.embedding.android.FlutterActivity
 

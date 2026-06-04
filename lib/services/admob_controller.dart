@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -71,9 +72,13 @@ class AdmobController extends ChangeNotifier {
     if (_adsDisabled || _isInterstitialAdLoading || _interstitialAd != null) return;
     _isInterstitialAdLoading = true;
 
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/1033173712' // Android Test Interstitial
-        : 'ca-app-pub-3940256099942544/4411468910'; // iOS Test Interstitial
+    final adUnitId = kDebugMode
+        ? (Platform.isAndroid
+            ? 'ca-app-pub-3940256099942544/1033173712' // Android Test Interstitial
+            : 'ca-app-pub-3940256099942544/4411468910') // iOS Test Interstitial
+        : (Platform.isAndroid
+            ? 'ca-app-pub-4671549534107534/1372293589' // Android Prod Interstitial
+            : 'ca-app-pub-4671549534107534/1954747514'); // iOS Prod Interstitial
 
     InterstitialAd.load(
       adUnitId: adUnitId,

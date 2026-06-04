@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/admob_controller.dart';
@@ -39,9 +40,13 @@ class _NativeAdCardState extends State<NativeAdCard> {
   void _loadAd() {
     if (AdmobController.instance.adsDisabled) return;
 
-    final adUnitId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/2247696110' // Android Test Native Ad
-        : 'ca-app-pub-3940256099942544/3986694507'; // iOS Test Native Ad
+    final adUnitId = kDebugMode
+        ? (Platform.isAndroid
+            ? 'ca-app-pub-3940256099942544/2247696110' // Android Test Native Ad
+            : 'ca-app-pub-3940256099942544/3986694507') // iOS Test Native Ad
+        : (Platform.isAndroid
+            ? 'ca-app-pub-4671549534107534/8469174656' // Android Prod Native Ad
+            : 'ca-app-pub-4671549534107534/3481102084'); // iOS Prod Native Ad
 
     _nativeAd = NativeAd(
       adUnitId: adUnitId,

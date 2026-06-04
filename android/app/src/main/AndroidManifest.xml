@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
     <application
-        android:label="nanourls"
+        android:label="NanoUrls"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <!-- Google Mobile Ads App ID: ca-app-pub-4671549534107534~5918043257 -->

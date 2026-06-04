@@ -11,10 +11,18 @@ import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/my_account_screen.dart';
 import 'screens/forgot_pass_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
   // Ensure Flutter engine bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase with platform-specific options
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(const MyApp());
 }
 
