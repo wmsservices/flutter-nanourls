@@ -438,7 +438,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       children: [
                         CircleAvatar(
                           radius: 40,
-                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                           child: Text(
                             initial,
                             style: const TextStyle(
@@ -736,9 +736,9 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.02),
+                  color: Colors.redAccent.withValues(alpha: 0.02),
                   borderRadius: BorderRadius.circular(16.0),
-                  border: Border.all(color: Colors.redAccent.withOpacity(0.15)),
+                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.15)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -764,9 +764,9 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
                           foregroundColor: Colors.white,
-                          disabledBackgroundColor: Colors.redAccent.withOpacity(0.3),
-                          disabledForegroundColor: Colors.white.withOpacity(0.5),
-                          shadowColor: Colors.redAccent.withOpacity(0.4),
+                          disabledBackgroundColor: Colors.redAccent.withValues(alpha: 0.3),
+                          disabledForegroundColor: Colors.white.withValues(alpha: 0.5),
+                          shadowColor: Colors.redAccent.withValues(alpha: 0.4),
                           elevation: 8,
                           textStyle: const TextStyle(
                             fontFamily: 'SplineSans',
@@ -856,12 +856,12 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.surface, AppColors.primary.withOpacity(0.05)],
+          colors: [AppColors.surface, AppColors.primary.withValues(alpha: 0.05)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -873,7 +873,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 context.l10n('plan_current'),
                 style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1.2),
               ),
-              Icon(Icons.rocket_launch, color: AppColors.primary.withOpacity(0.5)),
+              Icon(Icons.rocket_launch, color: AppColors.primary.withValues(alpha: 0.5)),
             ],
           ),
           const SizedBox(height: 8.0),

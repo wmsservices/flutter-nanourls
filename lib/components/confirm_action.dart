@@ -113,9 +113,9 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
           style: ElevatedButton.styleFrom(
             backgroundColor: widget.isDanger ? Colors.redAccent : AppColors.primary,
             foregroundColor: widget.isDanger ? Colors.white : AppColors.textLight,
-            disabledBackgroundColor: (widget.isDanger ? Colors.redAccent : AppColors.primary).withOpacity(0.3),
-            disabledForegroundColor: (widget.isDanger ? Colors.white : AppColors.textLight).withOpacity(0.5),
-            shadowColor: (widget.isDanger ? Colors.redAccent : AppColors.primary).withOpacity(0.4),
+            disabledBackgroundColor: (widget.isDanger ? Colors.redAccent : AppColors.primary).withValues(alpha: 0.3),
+            disabledForegroundColor: (widget.isDanger ? Colors.white : AppColors.textLight).withValues(alpha: 0.5),
+            shadowColor: (widget.isDanger ? Colors.redAccent : AppColors.primary).withValues(alpha: 0.4),
             elevation: 8,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(9999),

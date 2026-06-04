@@ -68,9 +68,9 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textLight,
-          disabledBackgroundColor: AppColors.primary.withOpacity(0.3),
-          disabledForegroundColor: AppColors.textLight.withOpacity(0.5),
-          shadowColor: AppColors.primary.withOpacity(0.4),
+          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.3),
+          disabledForegroundColor: AppColors.textLight.withValues(alpha: 0.5),
+          shadowColor: AppColors.primary.withValues(alpha: 0.4),
           elevation: 8,
           textStyle: const TextStyle(
             fontFamily: 'SplineSans',
@@ -101,7 +101,7 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceInput,
         hintStyle: TextStyle(
-          color: AppColors.textMuted.withOpacity(0.5),
+          color: AppColors.textMuted.withValues(alpha: 0.5),
           fontFamily: 'SplineSans',
           fontSize: 15,
         ),

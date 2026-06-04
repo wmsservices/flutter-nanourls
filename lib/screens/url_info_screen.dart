@@ -55,7 +55,7 @@ class UrlInfoScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.surfaceInner,
                     borderRadius: BorderRadius.circular(12.0),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,7 +127,7 @@ class UrlInfoScreen extends StatelessWidget {
                   url.description.isNotEmpty ? url.description : context.l10n('no_description'),
                   style: TextStyle(
                     fontSize: 14.0,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontStyle: url.description.isEmpty ? FontStyle.italic : FontStyle.normal,
                   ),
                 ),
@@ -138,9 +138,9 @@ class UrlInfoScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 14.0),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.05),
+                      color: Colors.amber.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.amber.withOpacity(0.2)),
+                      border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
                     ),
                     child: Row(
                       children: [
@@ -180,7 +180,7 @@ class UrlInfoScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.2),
+                        color: AppColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -203,7 +203,7 @@ class UrlInfoScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.05),
+                  backgroundColor: Colors.white.withValues(alpha: 0.05),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shadowColor: Colors.transparent,

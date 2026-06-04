@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
   String _selectedGlyphFilter = 'todos'; // 'todos' or any specific glyph
   bool _filterPasswordOnly = false;
+  bool _filterAnalyticsOnly = false;
   bool _isCompactViewMode = false;
   bool _showTrashOnly = false;
   bool _isLoading = false;
@@ -400,6 +401,9 @@ class _HomeScreenState extends State<HomeScreen> {
       // Filter by password protection toggle separately
       if (_filterPasswordOnly && !url.hasPassword) return false;
 
+      // Filter by analytics toggle
+      if (_filterAnalyticsOnly && !url.analytics) return false;
+
       // Filter by selected glyph from the dropdown
       if (_selectedGlyphFilter != 'todos') {
         if (url.glyph?.toLowerCase() != _selectedGlyphFilter.toLowerCase()) {
@@ -453,25 +457,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          // View Mode Button
-          IconButton(
-            icon: Icon(
-              _isCompactViewMode ? Icons.view_stream : Icons.view_list,
-              color: AppColors.primary,
-            ),
-            tooltip: _isCompactViewMode ? context.l10n('expanded_view_tooltip') : context.l10n('compact_view_tooltip'),
-            onPressed: () async {
-              setState(() {
-                _isCompactViewMode = !_isCompactViewMode;
-              });
-              try {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('is_compact_view', _isCompactViewMode);
-              } catch (_) {
-                // Preferences write error
-              }
-            },
-          ),
           // Account Button
           if (_sessionManager.isAuthenticated)
             IconButton(
@@ -504,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_sessionManager.currentUser?.enabled == false)
             Container(
               width: double.infinity,
-              color: Colors.amber[900]!.withOpacity(0.9),
+              color: Colors.amber[900]!.withValues(alpha: 0.9),
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 children: [
@@ -615,7 +600,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: _buildStatBadge(
                               icon: Icon(
                                 Icons.delete,
-                                color: _showTrashOnly ? Colors.redAccent : Colors.redAccent.withOpacity(0.6),
+                                color: _showTrashOnly ? Colors.redAccent : Colors.redAccent.withValues(alpha: 0.6),
                                 size: 16,
                               ),
                               count: '$_trashCount',
@@ -651,13 +636,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(height: 16.0),
 
-                    // Filter Controls: Dropdown and Password Protection Toggle
+                    // Filter Controls: View Mode Toggle, Glyph Dropdown, Analytics, and Password
                     Row(
                       children: [
+                        _buildViewModeToggle(),
+                        const SizedBox(width: 8.0),
                         Expanded(
                           child: _buildGlyphDropdown(),
                         ),
-                        const SizedBox(width: 12.0),
+                        const SizedBox(width: 8.0),
+                        _buildAnalyticsToggle(),
+                        const SizedBox(width: 8.0),
                         _buildPasswordToggle(),
                       ],
                     ),
@@ -789,11 +778,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.primary.withOpacity(0.08) : AppColors.surface,
+        color: isActive ? AppColors.primary.withValues(alpha: 0.08) : AppColors.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
           color: isActive 
-              ? AppColors.primary.withOpacity(0.4) 
+              ? AppColors.primary.withValues(alpha: 0.4) 
               : AppColors.border,
           width: 1.0,
         ),
@@ -885,45 +874,107 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildPasswordToggle() {
-    final isSelected = _filterPasswordOnly;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _filterPasswordOnly = !_filterPasswordOnly;
-        });
-      },
-      borderRadius: BorderRadius.circular(12.0),
-      child: Container(
-        height: 48.0,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface,
-          borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: 1.0,
+  Widget _buildViewModeToggle() {
+    final isCompact = _isCompactViewMode;
+    return Tooltip(
+      message: context.l10n('filter_view_mode_only'),
+      child: InkWell(
+        onTap: () async {
+          setState(() {
+            _isCompactViewMode = !_isCompactViewMode;
+          });
+          try {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('is_compact_view', _isCompactViewMode);
+          } catch (_) {}
+        },
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          width: 48.0,
+          height: 48.0,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: AppColors.border,
+              width: 1.0,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              isCompact ? Icons.view_stream : Icons.view_list,
+              color: AppColors.primary,
+              size: 18.0,
+            ),
           ),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsToggle() {
+    final isSelected = _filterAnalyticsOnly;
+    return Tooltip(
+      message: context.l10n('filter_analytics_only'),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _filterAnalyticsOnly = !_filterAnalyticsOnly;
+          });
+        },
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          width: 48.0,
+          height: 48.0,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.border,
+              width: 1.0,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.bar_chart,
+              color: isSelected ? AppColors.primary : AppColors.textMuted,
+              size: 18.0,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordToggle() {
+    final isSelected = _filterPasswordOnly;
+    return Tooltip(
+      message: context.l10n('filter_protected_only'),
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _filterPasswordOnly = !_filterPasswordOnly;
+          });
+        },
+        borderRadius: BorderRadius.circular(12.0),
+        child: Container(
+          width: 48.0,
+          height: 48.0,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : AppColors.border,
+              width: 1.0,
+            ),
+          ),
+          child: Center(
+            child: Icon(
               isSelected ? Icons.lock : Icons.lock_open,
               color: isSelected ? AppColors.primary : AppColors.textMuted,
               size: 18.0,
             ),
-            const SizedBox(width: 8.0),
-            Text(
-              context.l10n('filter_protected_only'),
-              style: TextStyle(
-                color: isSelected ? AppColors.primary : Colors.white70,
-                fontSize: 14.0,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontFamily: 'SplineSans',
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

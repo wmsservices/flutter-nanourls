@@ -228,9 +228,9 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.1),
+                      color: Colors.redAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                      border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -256,7 +256,7 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                     onPressed: _isLoading ? null : _submitForgotPassword,
                     style: ElevatedButton.styleFrom(
                       elevation: _isLoading ? 0 : 8,
-                      shadowColor: AppColors.primary.withOpacity(0.4),
+                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(9999),
                       ),

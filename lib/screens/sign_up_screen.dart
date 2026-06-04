@@ -405,7 +405,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: Container(
                           height: 6.0,
                           width: double.infinity,
-                          color: Colors.white.withOpacity(0.05),
+                          color: Colors.white.withValues(alpha: 0.05),
                           child: FractionallySizedBox(
                             alignment: Alignment.centerLeft,
                             widthFactor: _passwordScore / 6.0,
@@ -416,7 +416,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 boxShadow: _passwordScore >= 5
                                     ? [
                                         BoxShadow(
-                                          color: Colors.green.withOpacity(0.5),
+                                          color: Colors.green.withValues(alpha: 0.5),
                                           blurRadius: 10,
                                         )
                                       ]
@@ -503,9 +503,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
+                            color: Colors.redAccent.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
+                            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             children: [
@@ -529,9 +529,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
-                            color: Colors.green.withOpacity(0.1),
+                            color: Colors.green.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: Colors.green.withOpacity(0.2)),
+                            border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             children: [

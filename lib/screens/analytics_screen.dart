@@ -105,9 +105,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.15),
+            color: Colors.green.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
           ),
           child: Text(
             context.l10n('status_active'),
@@ -166,9 +166,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.15),
+                color: Colors.green.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Text(
                 context.l10n('status_active'),
@@ -541,7 +541,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: isPositive ? AppColors.primary.withOpacity(0.1) : Colors.redAccent.withOpacity(0.1),
+                                  color: isPositive ? AppColors.primary.withValues(alpha: 0.1) : Colors.redAccent.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
@@ -661,7 +661,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isPositive ? AppColors.primary.withOpacity(0.1) : Colors.redAccent.withOpacity(0.1),
+                  color: isPositive ? AppColors.primary.withValues(alpha: 0.1) : Colors.redAccent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -797,7 +797,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   width: 24,
                   height: 16,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(2),
                   ),
                   alignment: Alignment.center,
@@ -851,7 +851,7 @@ class ClicksChartPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final paintGrid = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withValues(alpha: 0.03)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -954,8 +954,8 @@ class ClicksChartPainter extends CustomPainter {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        AppColors.primary.withOpacity(0.35),
-        AppColors.primary.withOpacity(0.0),
+        AppColors.primary.withValues(alpha: 0.35),
+        AppColors.primary.withValues(alpha: 0.0),
       ],
     ).createShader(Rect.fromLTWH(paddingLeft, paddingTop, chartWidth, chartHeight));
     

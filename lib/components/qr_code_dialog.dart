@@ -118,7 +118,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -191,6 +191,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textLight,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -230,6 +231,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   side: const BorderSide(color: AppColors.border, width: 1.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),

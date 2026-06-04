@@ -28,12 +28,12 @@ class AboutNanoUrlsDialog extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.15),
+                  color: AppColors.primary.withValues(alpha: 0.15),
                   blurRadius: 16.0,
                   spreadRadius: 2.0,
                 ),
               ],
-              border: Border.all(color: AppColors.primary.withOpacity(0.3), width: 1.5),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
             ),
             padding: const EdgeInsets.all(14),
             child: SvgPicture.asset('assets/svg/logo.svg'),
@@ -66,9 +66,9 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
+              color: AppColors.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(9999),
-              border: Border.all(color: AppColors.primary.withOpacity(0.15)),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
             ),
             child: Text(
               context.l10n('about_dialog_version'),
@@ -114,6 +114,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.textLight,
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(9999),
                 ),

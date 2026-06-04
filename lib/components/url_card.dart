@@ -228,46 +228,37 @@ class _UrlCardState extends State<UrlCard> {
     final isExpired = widget.url.isExpired;
     final isEnabled = widget.url.enabled;
 
-    return GestureDetector(
-      onTap: widget.isCompact
-          ? () {
-              setState(() {
-                _isExpanded = !_isExpanded;
-              });
-            }
-          : null,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16.0),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: !isEnabled
-                ? Colors.redAccent.withOpacity(0.2)
-                : (isExpired
-                    ? AppColors.border
-                    : AppColors.primary.withOpacity(0.1)),
-            width: 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16.0),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(
+          color: !isEnabled
+              ? Colors.redAccent.withValues(alpha: 0.2)
+              : (isExpired
+                  ? AppColors.border
+                  : AppColors.primary.withValues(alpha: 0.1)),
+          width: 1.0,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: AnimatedCrossFade(
-            duration: const Duration(milliseconds: 300),
-            firstCurve: Curves.easeInOut,
-            secondCurve: Curves.easeInOut,
-            sizeCurve: Curves.easeInOut,
-            crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-            firstChild: _buildCompactChild(),
-            secondChild: _buildFullChild(isEnabled, isExpired),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: AnimatedCrossFade(
+          duration: const Duration(milliseconds: 300),
+          firstCurve: Curves.easeInOut,
+          secondCurve: Curves.easeInOut,
+          sizeCurve: Curves.easeInOut,
+          crossFadeState: _isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          firstChild: _buildCompactChild(),
+          secondChild: _buildFullChild(isEnabled, isExpired),
         ),
       ),
     );
@@ -295,7 +286,7 @@ class _UrlCardState extends State<UrlCard> {
         Expanded(
           child: Row(
             children: [
-              Expanded(
+              Flexible(
                 child: GestureDetector(
                   onTap: _launchUrl,
                   child: Text(
@@ -321,13 +312,24 @@ class _UrlCardState extends State<UrlCard> {
           ),
         ),
         const SizedBox(width: 8.0),
-        AnimatedRotation(
-          turns: _isExpanded ? 0.5 : 0.0,
-          duration: const Duration(milliseconds: 300),
-          child: const Icon(
-            Icons.keyboard_arrow_down,
-            color: Colors.white30,
-            size: 20.0,
+        InkWell(
+          onTap: () {
+            setState(() {
+              _isExpanded = !_isExpanded;
+            });
+          },
+          borderRadius: BorderRadius.circular(999),
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            child: AnimatedRotation(
+              turns: _isExpanded ? 0.5 : 0.0,
+              duration: const Duration(milliseconds: 300),
+              child: const Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white30,
+                size: 20.0,
+              ),
+            ),
           ),
         ),
       ],
@@ -338,7 +340,7 @@ class _UrlCardState extends State<UrlCard> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Row 1: Icon, Link Title, Actions Menu
+        // Row 1: Icon, Link Title, Actions Menu & Chevron
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -347,7 +349,7 @@ class _UrlCardState extends State<UrlCard> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -363,7 +365,7 @@ class _UrlCardState extends State<UrlCard> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
+                      Flexible(
                         child: GestureDetector(
                           onTap: _launchUrl,
                           child: Text(
@@ -371,7 +373,7 @@ class _UrlCardState extends State<UrlCard> {
                             style: const TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white
+                              color: Colors.white,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -405,94 +407,119 @@ class _UrlCardState extends State<UrlCard> {
                 ],
               ),
             ),
-            // Actions popup/menu
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
-              color: AppColors.surface,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                side: const BorderSide(color: AppColors.border, width: 1.0),
-              ),
-              onSelected: (value) {
-                if (value == 'details') {
-                  widget.onDetails();
-                } else if (value == 'qrcode') {
-                  widget.onQrCode();
-                } else if (value == 'edit') {
-                  widget.onEdit();
-                } else if (value == 'delete') {
-                  widget.onDelete();
-                } else if (value == 'restore') {
-                  widget.onRestore?.call();
-                }
-              },
-              itemBuilder: (BuildContext context) {
-                return [
-                  if (isEnabled) ...[
-                    PopupMenuItem(
-                      value: 'details',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.info_outline, size: 18.0, color: AppColors.primary),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('details'), style: const TextStyle(fontSize: 14.0)),
-                        ],
+            // Actions Row: popup/menu and chevron
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_vert, color: AppColors.textMuted),
+                  color: AppColors.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                    side: const BorderSide(color: AppColors.border, width: 1.0),
+                  ),
+                  onSelected: (value) {
+                    if (value == 'details') {
+                      widget.onDetails();
+                    } else if (value == 'qrcode') {
+                      widget.onQrCode();
+                    } else if (value == 'edit') {
+                      widget.onEdit();
+                    } else if (value == 'delete') {
+                      widget.onDelete();
+                    } else if (value == 'restore') {
+                      widget.onRestore?.call();
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      if (isEnabled) ...[
+                        PopupMenuItem(
+                          value: 'details',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.info_outline, size: 18.0, color: AppColors.primary),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('details'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'qrcode',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.qr_code, size: 18.0, color: Colors.blueAccent),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('qr_code'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.edit, size: 18.0, color: Colors.white70),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('edit'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete, size: 18.0, color: Colors.redAccent),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('delete'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                      ] else ...[
+                        PopupMenuItem(
+                          value: 'restore',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.restore_from_trash, size: 18.0, color: Colors.greenAccent),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('restore'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.delete_forever, size: 18.0, color: Colors.redAccent),
+                              const SizedBox(width: 8.0),
+                              Text(context.l10n('delete_permanently'), style: const TextStyle(fontSize: 14.0)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ];
+                  },
+                ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      _isExpanded = !_isExpanded;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(999),
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    child: AnimatedRotation(
+                      turns: _isExpanded ? 0.5 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.white30,
+                        size: 20.0,
                       ),
                     ),
-                    PopupMenuItem(
-                      value: 'qrcode',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.qr_code, size: 18.0, color: Colors.blueAccent),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('qr_code'), style: const TextStyle(fontSize: 14.0)),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'edit',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit, size: 18.0, color: Colors.white70),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('edit'), style: const TextStyle(fontSize: 14.0)),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete, size: 18.0, color: Colors.redAccent),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('delete'), style: const TextStyle(fontSize: 14.0)),
-                        ],
-                      ),
-                    ),
-                  ] else ...[
-                    PopupMenuItem(
-                      value: 'restore',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.restore_from_trash, size: 18.0, color: Colors.greenAccent),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('restore'), style: const TextStyle(fontSize: 14.0)),
-                        ],
-                      ),
-                    ),
-                    PopupMenuItem(
-                      value: 'delete',
-                      child: Row(
-                        children: [
-                          const Icon(Icons.delete_forever, size: 18.0, color: Colors.redAccent),
-                          const SizedBox(width: 8.0),
-                          Text(context.l10n('delete_permanently'), style: const TextStyle(fontSize: 14.0)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ];
-              },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -505,7 +532,7 @@ class _UrlCardState extends State<UrlCard> {
           decoration: BoxDecoration(
             color: AppColors.surfaceInner,
             borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.white.withOpacity(0.05)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
           ),
           child: Text(
             widget.url.realUrl,
@@ -580,7 +607,7 @@ class _UrlCardState extends State<UrlCard> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 child: Row(
@@ -621,7 +648,7 @@ class _UrlCardState extends State<UrlCard> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     width: 1.0,
                   ),
                 ),

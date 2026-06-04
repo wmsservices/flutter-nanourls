@@ -355,7 +355,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                   color: AppColors.surfaceInner,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: _showGlyphGrid ? AppColors.primary : Colors.white.withOpacity(0.1),
+                                    color: _showGlyphGrid ? AppColors.primary : Colors.white.withValues(alpha: 0.1),
                                     width: 1.5,
                                   ),
                                 ),
@@ -389,7 +389,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                             decoration: BoxDecoration(
                               color: AppColors.surfaceInner,
                               borderRadius: BorderRadius.circular(12.0),
-                              border: Border.all(color: Colors.white.withOpacity(0.05)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                             ),
                             child: GridView.builder(
                               shrinkWrap: true,
@@ -414,7 +414,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? AppColors.primary.withOpacity(0.1)
+                                          ? AppColors.primary.withValues(alpha: 0.1)
                                           : Colors.transparent,
                                       borderRadius: BorderRadius.circular(8),
                                       border: Border.all(
@@ -567,7 +567,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.surfaceInner,
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.white.withOpacity(0.02)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.02)),
                     ),
                     child: Column(
                       children: [
@@ -617,7 +617,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                               decoration: BoxDecoration(
                                 color: AppColors.surface,
                                 borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -643,7 +643,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.surfaceInner,
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.white.withOpacity(0.02)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.02)),
                     ),
                     child: Column(
                       children: [
@@ -708,7 +708,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.surfaceInner,
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.white.withOpacity(0.02)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.02)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -749,9 +749,9 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                     Container(
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent.withOpacity(0.1),
+                        color: Colors.redAccent.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12.0),
-                        border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
+                        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
                       ),
                       child: Row(
                         children: [
