@@ -57,11 +57,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _checkAutoLogin() async {
     final startTime = DateTime.now();
     bool loginSuccess = false;
+    bool hasSeenOnboarding = false;
     String? emailToPrefill;
     String? loginError;
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
       final remember = prefs.getBool('remember_me') ?? false;
       if (remember) {
         final encryptedEmail = prefs.getString('saved_email');
@@ -96,18 +98,35 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     if (!mounted) return;
 
-    if (loginSuccess) {
-      Navigator.of(context).pushReplacementNamed('/home');
-    } else {
+    if (!hasSeenOnboarding) {
       Navigator.of(context).pushReplacementNamed(
-        '/login',
-        arguments: emailToPrefill != null
-            ? {
-                'email': emailToPrefill,
-                'error': loginError ?? context.l10n('auto_login_failed'),
-              }
-            : null,
+        '/onboarding',
+        arguments: {
+          'targetRoute': loginSuccess ? '/home' : '/login',
+          'targetArguments': loginSuccess
+              ? null
+              : (emailToPrefill != null
+                  ? {
+                      'email': emailToPrefill,
+                      'error': loginError ?? context.l10n('auto_login_failed'),
+                    }
+                  : null),
+        },
       );
+    } else {
+      if (loginSuccess) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed(
+          '/login',
+          arguments: emailToPrefill != null
+              ? {
+                  'email': emailToPrefill,
+                  'error': loginError ?? context.l10n('auto_login_failed'),
+                }
+              : null,
+        );
+      }
     }
   }
 

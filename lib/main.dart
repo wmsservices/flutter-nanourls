@@ -11,6 +11,7 @@ import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/my_account_screen.dart';
 import 'screens/forgot_pass_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpScreen(),
         '/account': (context) => const MyAccountScreen(),
         '/forgot-password': (context) => const ForgotPassScreen(),
+        '/onboarding': (context) => const OnboardingScreen(),
       },
       
       // Handle dynamic route arguments for detail view

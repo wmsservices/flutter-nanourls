@@ -31,6 +31,18 @@ class AppLocalizations {
       'auto_login_failed': 'Automatic login failed. Please sign in.',
       'splash_tagline': 'Shorten your links with style',
 
+      // Onboarding
+      'onboarding_skip': 'Skip',
+      'onboarding_next': 'Next',
+      'onboarding_start': 'Get Started',
+      'onboarding_title_1': 'Shorten',
+      'onboarding_desc_1': 'Turn long URLs into sleek and tiny links',
+      'onboarding_title_2': 'Filter',
+      'onboarding_desc_2': 'Search and sort your links instantly',
+      'onboarding_title_3': 'Share',
+      'onboarding_desc_3': 'Generate QR codes and share anywhere',
+
+
       // Login Screen
       'login_header_title': 'Shorten your\nURLs with\n',
       'login_header_desc': 'The simplest, fastest and safest way to manage your links. Transform long URLs into short and powerful links.',
@@ -342,6 +354,18 @@ class AppLocalizations {
       // Splash Screen
       'auto_login_failed': 'Falha no login automático. Por favor, identifique-se.',
       'splash_tagline': 'Encurte seus links com estilo',
+
+      // Onboarding
+      'onboarding_skip': 'Pular',
+      'onboarding_next': 'Avançar',
+      'onboarding_start': 'Começar',
+      'onboarding_title_1': 'Encurtar',
+      'onboarding_desc_1': 'Transforme links longos em NanoUrls elegantes',
+      'onboarding_title_2': 'Organizar',
+      'onboarding_desc_2': 'Busque e filtre seus links instantaneamente',
+      'onboarding_title_3': 'Compartilhar',
+      'onboarding_desc_3': 'Gere códigos QR e compartilhe em um toque',
+
 
       // Login Screen
       'login_header_title': 'Encurte suas\nURLs com\n',
@@ -655,6 +679,18 @@ class AppLocalizations {
       'auto_login_failed': 'Error en el inicio de sesión automático. Por favor, identifíquese.',
       'splash_tagline': 'Acorta tus enlaces con estilo',
 
+      // Onboarding
+      'onboarding_skip': 'Omitir',
+      'onboarding_next': 'Siguiente',
+      'onboarding_start': 'Empezar',
+      'onboarding_title_1': 'Acortar',
+      'onboarding_desc_1': 'Convierte enlaces largos en NanoUrls elegantes',
+      'onboarding_title_2': 'Organizar',
+      'onboarding_desc_2': 'Busca y filtra tus enlaces al instante',
+      'onboarding_title_3': 'Compartir',
+      'onboarding_desc_3': 'Genera códigos QR y comparte donde quieras',
+
+
       // Login Screen
       'login_header_title': 'Acorte sus\nURLs con\n',
       'login_header_desc': 'La forma más sencilla, rápida y segura de gestionar sus enlaces. Transforme URLs largas en enlaces cortos y potentes.',
@@ -966,6 +1002,18 @@ class AppLocalizations {
       // Splash Screen
       'auto_login_failed': 'Échec de la connexion automatique. Veuillez vous connecter.',
       'splash_tagline': 'Raccourcissez vos liens avec style',
+
+      // Onboarding
+      'onboarding_skip': 'Passer',
+      'onboarding_next': 'Suivant',
+      'onboarding_start': 'Commencer',
+      'onboarding_title_1': 'Raccourcir',
+      'onboarding_desc_1': 'Transformez vos liens longs en NanoUrls élégantes',
+      'onboarding_title_2': 'Organiser',
+      'onboarding_desc_2': 'Recherchez et filtrez vos liens instantanément',
+      'onboarding_title_3': 'Partager',
+      'onboarding_desc_3': 'Générez des codes QR et partagez facilement',
+
 
       // Login Screen
       'login_header_title': 'Raccourcissez vos\nURLs avec\n',
