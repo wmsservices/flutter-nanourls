@@ -637,11 +637,11 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
 
   Widget _buildMockViewModeToggle() {
     return Container(
-      width: 44.0,
-      height: 44.0,
+      width: 48.0,
+      height: 48.0,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: AppColors.border,
           width: 1.0,
@@ -659,30 +659,37 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
 
   Widget _buildMockGlyphDropdown(BuildContext context) {
     return Container(
-      height: 44.0,
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      height: 48.0,
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0),
         border: Border.all(color: AppColors.border, width: 1.0),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.grid_view, color: AppColors.primary, size: 16),
-              const SizedBox(width: 6.0),
-              Text(
-                context.l10n('filter_all_glyphs'),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12.0,
-                  fontFamily: 'SplineSans',
+          Expanded(
+            child: Row(
+              children: [
+                const Icon(Icons.grid_view, color: AppColors.primary, size: 18),
+                const SizedBox(width: 8.0),
+                Expanded(
+                  child: Text(
+                    context.l10n('filter_all_glyphs'),
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 14.0,
+                      fontFamily: 'SplineSans',
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(width: 4.0),
           const Icon(Icons.arrow_drop_down, color: AppColors.textMuted, size: 18),
         ],
       ),
@@ -695,11 +702,11 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
         : icon;
 
     return Container(
-      width: 44.0,
-      height: 44.0,
+      width: 48.0,
+      height: 48.0,
       decoration: BoxDecoration(
         color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.surface,
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(12.0),
         border: Border.all(
           color: isSelected ? AppColors.primary : AppColors.border,
           width: 1.0,
@@ -735,7 +742,7 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(16.0),
             border: Border.all(
               color: AppColors.borderSubtle,
               width: 1.0,
@@ -814,10 +821,10 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
             children: [
               // Search Field from HomeScreen
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceInput,
-                  borderRadius: BorderRadius.circular(12.0),
+                  color: AppColors.surfaceInner,
+                  borderRadius: BorderRadius.circular(16.0),
                   border: Border.all(color: AppColors.border, width: 1.0),
                 ),
                 child: Row(
@@ -843,13 +850,13 @@ class _FilterAnimationWidgetState extends State<FilterAnimationWidget> with Sing
               Row(
                 children: [
                   _buildMockViewModeToggle(),
-                  const SizedBox(width: 6.0),
+                  const SizedBox(width: 8.0),
                   Expanded(
                     child: _buildMockGlyphDropdown(context),
                   ),
-                  const SizedBox(width: 6.0),
+                  const SizedBox(width: 8.0),
                   _buildMockFilterToggle(Icons.bar_chart, _activeFilterState == 1),
-                  const SizedBox(width: 6.0),
+                  const SizedBox(width: 8.0),
                   _buildMockFilterToggle(Icons.lock, _activeFilterState == 2, isLock: true),
                 ],
               ),
@@ -912,14 +919,28 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
   late Animation<double> _dialogOpacity;
   late Animation<double> _dialogScale;
 
-  int _cycleState = 0; // 0: Expanded card, 1: cursor hover/click, 2: Dialog Open, 3: Scan loop
+  int _cycleState = 0; // 0: cursor moving to more_vert, 1: clicking more_vert, 2: menu open & cursor moving to QR, 3: clicking QR, 4: menu closes/dialog opening, 5: laser scan loop
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 5500),
+    );
+
+    _dialogOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.44, 0.52, curve: Curves.easeIn),
+      ),
+    );
+
+    _dialogScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.44, 0.55, curve: Curves.elasticOut),
+      ),
     );
 
     _laserAnimation = TweenSequence<double>([
@@ -928,35 +949,25 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
     ]).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.40, 0.95, curve: Curves.easeInOut),
-      ),
-    );
-
-    _dialogOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.25, 0.35, curve: Curves.easeIn),
-      ),
-    );
-
-    _dialogScale = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.25, 0.38, curve: Curves.elasticOut),
+        curve: const Interval(0.52, 0.95, curve: Curves.easeInOut),
       ),
     );
 
     _controller.addListener(() {
       final val = _controller.value;
       int newState;
-      if (val < 0.15) {
+      if (val < 0.18) {
         newState = 0;
-      } else if (val < 0.32) {
+      } else if (val < 0.24) {
         newState = 1;
-      } else if (val < 0.45) {
+      } else if (val < 0.38) {
         newState = 2;
-      } else {
+      } else if (val < 0.44) {
         newState = 3;
+      } else if (val < 0.52) {
+        newState = 4;
+      } else {
+        newState = 5;
       }
 
       if (newState != _cycleState) {
@@ -979,6 +990,30 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
     super.dispose();
   }
 
+  Widget _buildMockMenuItem(BuildContext context, IconData icon, String label, Color iconColor, bool isSelected) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+      color: isSelected ? Colors.white.withValues(alpha: 0.08) : Colors.transparent,
+      child: Row(
+        children: [
+          Icon(icon, size: 16.0, color: isSelected ? AppColors.primary : iconColor),
+          const SizedBox(width: 8.0),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.0,
+                color: isSelected ? AppColors.primary : Colors.white,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FittedBox(
@@ -990,11 +1025,40 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
           animation: _controller,
           builder: (context, child) {
             final val = _controller.value;
-            // Interpolate touch pointer coordinates
-            final double progress = ((val - 0.15) / 0.15).clamp(0.0, 1.0);
-            final double curRight = Tween<double>(begin: 20.0, end: 110.0).transform(progress);
-            final double curBottom = Tween<double>(begin: 10.0, end: 40.0).transform(progress);
-            final double curScale = (val >= 0.28 && val <= 0.32) ? 0.75 : 1.0;
+            double curRight = 20.0;
+            double curTop = 200.0;
+            double curScale = 1.0;
+            bool showPointer = false;
+
+            if (val < 0.18) {
+              showPointer = true;
+              final double progress = (val / 0.18).clamp(0.0, 1.0);
+              curRight = Tween<double>(begin: 20.0, end: 38.0).transform(progress);
+              curTop = Tween<double>(begin: 200.0, end: 20.0).transform(progress);
+            } else if (val < 0.24) {
+              showPointer = true;
+              curRight = 38.0;
+              curTop = 20.0;
+              final double progress = ((val - 0.18) / 0.06).clamp(0.0, 1.0);
+              curScale = TweenSequence<double>([
+                TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.75), weight: 50),
+                TweenSequenceItem(tween: Tween<double>(begin: 0.75, end: 1.0), weight: 50),
+              ]).transform(progress);
+            } else if (val < 0.38) {
+              showPointer = true;
+              final double progress = ((val - 0.24) / 0.14).clamp(0.0, 1.0);
+              curRight = Tween<double>(begin: 38.0, end: 50.0).transform(progress);
+              curTop = Tween<double>(begin: 20.0, end: 88.0).transform(progress);
+            } else if (val < 0.44) {
+              showPointer = true;
+              curRight = 50.0;
+              curTop = 88.0;
+              final double progress = ((val - 0.38) / 0.06).clamp(0.0, 1.0);
+              curScale = TweenSequence<double>([
+                TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 0.75), weight: 50),
+                TweenSequenceItem(tween: Tween<double>(begin: 0.75, end: 1.0), weight: 50),
+              ]).transform(progress);
+            }
 
             return Stack(
               alignment: Alignment.center,
@@ -1003,7 +1067,7 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Opacity(
-                    opacity: _cycleState >= 2 ? 0.2 : 1.0,
+                    opacity: _cycleState >= 4 ? 0.2 : 1.0,
                     child: Container(
                       padding: const EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
@@ -1048,6 +1112,8 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                   ],
                                 ),
                               ),
+                              Icon(Icons.more_vert, color: _cycleState == 1 ? AppColors.primary : AppColors.textMuted, size: 20),
+                              const SizedBox(width: 4.0),
                               const Icon(Icons.keyboard_arrow_down, color: Colors.white30, size: 18),
                             ],
                           ),
@@ -1083,56 +1149,32 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                           const SizedBox(height: 8.0),
 
                           // Click counter & buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.05),
-                                  borderRadius: BorderRadius.circular(6.0),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.bar_chart, size: 14.0, color: AppColors.primary),
-                                    SizedBox(width: 4.0),
-                                    Text("45 clicks", style: TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white)),
-                                  ],
-                                ),
-                              ),
-
-                              Row(
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: SizedBox(
+                              width: 270.0,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  // QR Code Action Button (clicked by cursor)
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                                     decoration: BoxDecoration(
-                                      color: _cycleState == 1 ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
-                                      borderRadius: BorderRadius.circular(999),
-                                      border: Border.all(
-                                        color: _cycleState == 1 ? AppColors.primary : Colors.white10,
-                                        width: 1.0,
-                                      ),
+                                      color: Colors.white.withValues(alpha: 0.05),
+                                      borderRadius: BorderRadius.circular(6.0),
                                     ),
-                                    child: Row(
+                                    child: const Row(
                                       children: [
-                                        Icon(Icons.qr_code, size: 10.0, color: _cycleState == 1 ? AppColors.primary : AppColors.textMuted),
-                                        const SizedBox(width: 4.0),
-                                        Text(
-                                          context.l10n('qr_code'),
-                                          style: TextStyle(
-                                            fontSize: 10.0,
-                                            color: _cycleState == 1 ? AppColors.primary : AppColors.textMuted,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
+                                        Icon(Icons.bar_chart, size: 14.0, color: AppColors.primary),
+                                        SizedBox(width: 4.0),
+                                        Text("45 clicks", style: TextStyle(fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white)),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 4.0),
+
                                   // Share Action Button
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(999),
                                       border: Border.all(color: Colors.white10, width: 1.0),
@@ -1141,20 +1183,20 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                       children: [
                                         Icon(
                                           Theme.of(context).platform == TargetPlatform.iOS ? Icons.ios_share : Icons.share,
-                                          size: 10.0,
+                                          size: 11.0,
                                           color: AppColors.textMuted,
                                         ),
-                                        const SizedBox(width: 4.0),
+                                        const SizedBox(width: 6.0),
                                         Text(
                                           context.l10n('share'),
-                                          style: const TextStyle(fontSize: 10.0, color: AppColors.textMuted, fontWeight: FontWeight.w500),
+                                          style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted, fontWeight: FontWeight.w500),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -1162,11 +1204,42 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                   ),
                 ),
 
+                // Mock Popup Menu Dropdown Overlay
+                if (_cycleState == 2 || _cycleState == 3)
+                  Positioned(
+                    right: 20.0,
+                    top: 44.0,
+                    child: Container(
+                      width: 140,
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(12.0),
+                        border: Border.all(color: AppColors.border, width: 1.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildMockMenuItem(context, Icons.info_outline, context.l10n('details'), AppColors.primary, false),
+                          _buildMockMenuItem(context, Icons.qr_code, context.l10n('qr_code'), Colors.blueAccent, _cycleState == 3),
+                          _buildMockMenuItem(context, Icons.edit, context.l10n('edit'), Colors.white70, false),
+                          _buildMockMenuItem(context, Icons.delete, context.l10n('delete'), Colors.redAccent, false),
+                        ],
+                      ),
+                    ),
+                  ),
+
                 // Touch pointer overlay
-                if (val >= 0.15 && val <= 0.34)
+                if (showPointer)
                   Positioned(
                     right: curRight,
-                    bottom: curBottom,
+                    top: curTop,
                     child: Transform.scale(
                       scale: curScale,
                       child: Container(
@@ -1189,14 +1262,14 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                   ),
 
                 // QrCodeDialog popup mockup (Fidelity with QrCodeDialog)
-                if (_cycleState >= 2)
+                if (_cycleState >= 4)
                   Opacity(
                     opacity: _dialogOpacity.value,
                     child: Transform.scale(
                       scale: _dialogScale.value,
                       child: Container(
                         width: 240, // Fixed width on canvas
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
                         decoration: BoxDecoration(
                           color: AppColors.surface,
                           borderRadius: BorderRadius.circular(16.0),
@@ -1215,41 +1288,41 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                             // Dialog Title
                             Text(
                               context.l10n('qr_code_dialog_title'),
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14.0),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.0),
                             ),
-                            const SizedBox(height: 12.0),
+                            const SizedBox(height: 8.0),
 
                             // White QR Code Image Container
                             Stack(
                               alignment: Alignment.center,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16.0),
+                                    borderRadius: BorderRadius.circular(12.0),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(alpha: 0.15),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
+                                    borderRadius: BorderRadius.circular(6.0),
                                     child: CustomPaint(
-                                      size: const Size(90, 90),
+                                      size: const Size(80, 80),
                                       painter: QRPainter(color: Colors.black87),
                                     ),
                                   ),
                                 ),
                                 // Laser scan line animation
-                                if (_cycleState == 3)
+                                if (_cycleState == 5)
                                   Positioned(
                                     left: 8,
                                     right: 8,
-                                    top: 98 * _laserAnimation.value,
+                                    top: 88 * _laserAnimation.value,
                                     child: Container(
                                       height: 2.0,
                                       decoration: BoxDecoration(
@@ -1258,7 +1331,7 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                           BoxShadow(
                                             color: AppColors.primary.withValues(alpha: 0.8),
                                             blurRadius: 4,
-                                            spreadRadius: 1.5,
+                                            spreadRadius: 1.0,
                                           ),
                                         ],
                                       ),
@@ -1266,7 +1339,7 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                   ),
                               ],
                             ),
-                            const SizedBox(height: 12.0),
+                            const SizedBox(height: 8.0),
 
                             // Underline Shortlink text
                             const Text(
@@ -1274,17 +1347,17 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                               style: TextStyle(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13.0,
+                                fontSize: 12.0,
                                 decoration: TextDecoration.underline,
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 16.0),
+                            const SizedBox(height: 10.0),
 
                             // Mock Share Button
                             Container(
                               width: double.infinity,
-                              height: 38.0,
+                              height: 36.0,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
@@ -1295,27 +1368,27 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                 children: [
                                   Icon(
                                     Theme.of(context).platform == TargetPlatform.iOS ? Icons.ios_share : Icons.share,
-                                    size: 14,
+                                    size: 13,
                                     color: AppColors.textLight,
                                   ),
-                                  const SizedBox(width: 8.0),
+                                  const SizedBox(width: 6.0),
                                   Text(
                                     context.l10n('share'),
                                     style: const TextStyle(
                                       color: AppColors.textLight,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13.0,
+                                      fontSize: 12.0,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 8.0),
+                            const SizedBox(height: 6.0),
 
                             // Mock Close Button
                             Container(
                               width: double.infinity,
-                              height: 38.0,
+                              height: 36.0,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
@@ -1327,7 +1400,7 @@ class _ShareAnimationWidgetState extends State<ShareAnimationWidget> with Single
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14.0,
+                                  fontSize: 12.0,
                                 ),
                               ),
                             ),
@@ -1359,7 +1432,6 @@ class QRPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Helper to draw corners (QR positioning symbols)
     void drawFinderPattern(double x, double y, double size) {
       canvas.drawRect(Rect.fromLTWH(x, y, size, size), paint);
       canvas.drawRect(
@@ -1377,7 +1449,6 @@ class QRPainter extends CustomPainter {
     drawFinderPattern(w - patternSize, 0, patternSize);
     drawFinderPattern(0, h - patternSize, patternSize);
 
-    // Random QR code pixel dots inside the body
     final randomDots = [
       Rect.fromLTWH(w * 0.42, h * 0.10, w * 0.10, h * 0.10),
       Rect.fromLTWH(w * 0.56, h * 0.06, w * 0.10, h * 0.14),

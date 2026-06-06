@@ -17,7 +17,9 @@ dependencies:
   app_tracking_transparency: ^2.0.4
   cupertino_icons: ^1.0.8
   device_info_plus: ^13.1.0
+  firebase_analytics: ^12.4.2
   firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
   flutter_svg: ^2.0.9
   font_awesome_flutter: ^10.4.0
   google_mobile_ads: ^5.2.0

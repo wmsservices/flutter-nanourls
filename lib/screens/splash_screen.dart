@@ -6,6 +6,7 @@ import '../services/crypto_service.dart';
 import '../services/admob_controller.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Splash Screen displaying the SVG logo with premium pulsing animations
 class SplashScreen extends StatefulWidget {
@@ -60,6 +61,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     bool hasSeenOnboarding = false;
     String? emailToPrefill;
     String? loginError;
+
+    // Request push notification permissions on app startup
+    try {
+      final messaging = FirebaseMessaging.instance;
+      await messaging.requestPermission(
+        alert: true,
+        announcement: false,
+        badge: true,
+        carPlay: false,
+        criticalAlert: false,
+        provisional: false,
+        sound: true,
+      );
+    } catch (_) {
+      // Ignored if platform doesn't support messaging or if it fails
+    }
 
     try {
       final prefs = await SharedPreferences.getInstance();
