@@ -83,7 +83,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
   Widget build(BuildContext context) {
     final String qrCodeUrl = widget.url.qrCodePngUrl?.isNotEmpty == true
         ? widget.url.qrCodePngUrl!
-        : 'https://api.nanourls.com/v1/nano/qr/${widget.url.goLink}';
+        : 'https://api.nanourls.com/v1/nano/qr/${widget.url.shortUrl}';
 
     return Dialog(
       backgroundColor: AppColors.surface,

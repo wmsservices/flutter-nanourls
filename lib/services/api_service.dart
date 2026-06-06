@@ -55,7 +55,7 @@ class ApiService {
     throw HttpException(_parseError(response));
   }
 
-  // Coleta dados específicos do dispositivo, IP e o Token Push (FCM) para envio no momento do login
+  // Coleta dados específicos do dispositivo, IP e o Token Push (FCM) para envio no momento do login e cadastro
   Future<Map<String, dynamic>> _buildDeviceAndFcmPayload() async {
     final ipAddress = await _getClientIp();
     final encryptedIp = ipAddress.contains(':') ? 'Unknow' : _cryptoService.encryptIpAddress(ipAddress);
@@ -111,7 +111,7 @@ class ApiService {
         headers: _buildHeaders(requiresAuth: false),
         body: jsonEncode(payload),
       );
-      //debugPrint('PAYLOAD ENVIADO PARA A API: ${jsonEncode(payload)}');
+
       final responseBody = _handleResponse(response);
       if (responseBody == null) throw const HttpException('Resposta de autenticação vazia.');
 
@@ -131,6 +131,10 @@ class ApiService {
   // Registra um novo usuário no sistema
   Future<void> signUp(String name, String email, String password) async {
     final url = Uri.parse('$_baseUrl/v1/user/signup');
+
+    // Reaproveita a função de device/FCM para garantir consistência no token gerado e na criptografia do deviceId
+    final devicePayload = await _buildDeviceAndFcmPayload();
+
     final body = {
       'userId': '',
       'userName': name.trim(),
@@ -140,6 +144,10 @@ class ApiService {
       'enabled': true,
       'createdAt': DateTime.now().toUtc().toIso8601String(),
       'lastModified': DateTime.now().toUtc().toIso8601String(),
+      // Adicionando os novos campos no payload de registro
+      'ipAddress': devicePayload['ipAddress'],
+      'deviceId': devicePayload['deviceId'],
+      'tokenFcm': devicePayload['tokenFcm'],
     };
 
     try {

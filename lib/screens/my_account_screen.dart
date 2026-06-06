@@ -195,6 +195,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
             ? context.l10n('save_profile_dialog_message_email')
             : context.l10n('save_profile_dialog_message_normal'),
         confirmText: context.l10n('confirm'),
+        requirePassword: true, // Adicionado para exibir o campo de senha no modal
       ),
     );
 
@@ -341,6 +342,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
         message: context.l10n('delete_account_dialog_message'),
         confirmText: context.l10n('delete_account_dialog_btn'),
         isDanger: true,
+        requirePassword: true, // Adicionado para exigir e validar a senha na exclusão da conta
       ),
     );
 
@@ -401,8 +403,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   @override
   Widget build(BuildContext context) {
     final user = _sessionManager.currentUser;
-    final initial = user?.userName.isNotEmpty == true 
-        ? user!.userName.substring(0, 1).toUpperCase() 
+    final initial = user?.userName.isNotEmpty == true
+        ? user!.userName.substring(0, 1).toUpperCase()
         : 'U';
     final memberSinceStr = user != null
         ? '${_getMonthName(user.createdAt.month)} ${user.createdAt.year}'
@@ -571,21 +573,21 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                           onPressed: _isProfileSaving ? null : _updateProfile,
                           child: _isProfileSaving
                               ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.textLight,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: AppColors.textLight,
+                              strokeWidth: 2.5,
+                            ),
+                          )
                               : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.save, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(context.l10n('save_changes')),
-                                  ],
-                                ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.save, size: 18),
+                              const SizedBox(width: 8),
+                              Text(context.l10n('save_changes')),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -708,21 +710,21 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                           onPressed: _isPasswordSaving ? null : _changePassword,
                           child: _isPasswordSaving
                               ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.textLight,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: AppColors.textLight,
+                              strokeWidth: 2.5,
+                            ),
+                          )
                               : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(Icons.key, size: 18),
-                                    const SizedBox(width: 8),
-                                    Text(context.l10n('change_password_btn')),
-                                  ],
-                                ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.key, size: 18),
+                              const SizedBox(width: 8),
+                              Text(context.l10n('change_password_btn')),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -779,21 +781,21 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                         ),
                         child: _isDeletingAccount
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.5,
-                                ),
-                              )
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
                             : Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.delete_forever, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(context.l10n('delete_account_btn')),
-                                ],
-                              ),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.delete_forever, size: 18),
+                            const SizedBox(width: 8),
+                            Text(context.l10n('delete_account_btn')),
+                          ],
+                        ),
                       ),
                     ),
                   ],

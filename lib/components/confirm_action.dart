@@ -7,6 +7,7 @@ class ConfirmActionDialog extends StatefulWidget {
   final String message;
   final String? confirmText;
   final bool isDanger;
+  final bool requirePassword; // Adicionado para permitir reuso sem pedir senha
 
   const ConfirmActionDialog({
     super.key,
@@ -14,6 +15,7 @@ class ConfirmActionDialog extends StatefulWidget {
     required this.message,
     this.confirmText,
     this.isDanger = false,
+    this.requirePassword = false, // Falso por padrão
   });
 
   @override
@@ -71,31 +73,34 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
               widget.message,
               style: const TextStyle(color: Colors.white70, fontSize: 14.0),
             ),
-            const SizedBox(height: 20.0),
-            Text(
-              context.l10n('confirm_action_dialog_message'),
-              style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white70),
-            ),
-            const SizedBox(height: 8.0),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.lock_outline),
-                hintText: context.l10n('confirm_action_dialog_password_prompt'),
-                suffixIcon: IconButton(
-                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
+            // Exibe o campo de senha SOMENTE se a ação exigir
+            if (widget.requirePassword) ...[
+              const SizedBox(height: 20.0),
+              Text(
+                context.l10n('confirm_action_dialog_message'),
+                style: const TextStyle(fontSize: 12.0, fontWeight: FontWeight.bold, color: Colors.white70),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return context.l10n('confirm_action_dialog_password_empty');
-                }
-                return null;
-              },
-            ),
+              const SizedBox(height: 8.0),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  hintText: context.l10n('confirm_action_dialog_password_prompt'),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return context.l10n('confirm_action_dialog_password_empty');
+                  }
+                  return null;
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -106,8 +111,13 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              Navigator.pop(context, _passwordController.text);
+            if (widget.requirePassword) {
+              if (_formKey.currentState!.validate()) {
+                Navigator.pop(context, _passwordController.text);
+              }
+            } else {
+              // Se não pede senha, apenas retorna um bool confirmando a ação
+              Navigator.pop(context, true);
             }
           },
           style: ElevatedButton.styleFrom(

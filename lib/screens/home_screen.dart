@@ -5,6 +5,7 @@ import '../entities/nano_url.dart';
 import '../components/url_card.dart';
 import '../components/qr_code_dialog.dart';
 import '../components/about_dialog.dart';
+import '../components/confirm_action.dart'; // Importação do componente modularizado
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../services/session_manager.dart';
@@ -111,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _apiError = e.toString().replaceAll('HttpException: ', '').replaceAll('Exception: ', '');
         _urls = [];
       });
-      
+
       // Notify user about API error
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -131,8 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Calculate trash count dynamically
   int get _trashCount => _urls.where((u) => !u.enabled).length;
-
-
 
   // Prepends the new URL to the list and updates user remaining balance
   void _addNewShortenedUrl(NanoUrl url) {
@@ -243,17 +242,30 @@ class _HomeScreenState extends State<HomeScreen> {
             _urls[index] = updatedUrl;
           }
 
+          ScaffoldMessenger.of(context).hideCurrentSnackBar(); // Remove pendentes
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(context.l10n('delete_success_snackbar')),
               action: SnackBarAction(
                 label: context.l10n('undo'),
                 textColor: AppColors.textLight,
-                onPressed: () => _restoreUrl(updatedUrl),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  _restoreUrl(updatedUrl);
+                },
               ),
               backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating, // Desgruda das bordas e ajuda contra bugs da UI nativa
+              duration: const Duration(seconds: 3),
             ),
           );
+
+          // TRUQUE: Força o encerramento da Snackbar após 3 segundos, contornando a acessibilidade do Android
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted) {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            }
+          });
         });
       } catch (e) {
         if (mounted) {
@@ -267,45 +279,16 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } else {
       // 2. Permanent Delete from Trash (requires confirmation)
-      final confirmed = await showDialog<bool>(
+      // Utilizando o nosso componente modularizado agora!
+      final confirmed = await showDialog<dynamic>(
         context: context,
-        builder: (context) {
-          return AlertDialog(
-            backgroundColor: AppColors.surface,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
-              side: const BorderSide(color: AppColors.border),
-            ),
-            title: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 28),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n('delete_trash_confirm_title'),
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18.0),
-                ),
-              ],
-            ),
-            content: Text(
-              context.l10n('delete_trash_confirm_message'),
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 14.0),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(context.l10n('cancel'), style: const TextStyle(color: Colors.white70)),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(context.l10n('delete')),
-              ),
-            ],
-          );
-        },
+        builder: (context) => ConfirmActionDialog(
+          title: context.l10n('delete_trash_confirm_title'),
+          message: context.l10n('delete_trash_confirm_message'),
+          confirmText: context.l10n('delete'),
+          isDanger: true,
+          requirePassword: false, // Sem exigir a senha do usuário
+        ),
       );
 
       if (confirmed == true) {
@@ -320,6 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SnackBar(
                 content: Text(context.l10n('delete_success_snackbar')),
                 backgroundColor: Colors.redAccent,
+                duration: const Duration(seconds: 3),
               ),
             );
           });
@@ -482,8 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(width: 8.0),
             Expanded(
               child: Text(
-                _sessionManager.isAuthenticated 
-                    ? context.l10n('hello_user', args: [_sessionManager.currentUser?.userName ?? '']) 
+                _sessionManager.isAuthenticated
+                    ? context.l10n('hello_user', args: [_sessionManager.currentUser?.userName ?? ''])
                     : context.l10n('dashboard_demo'),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
@@ -562,15 +546,15 @@ class _HomeScreenState extends State<HomeScreen> {
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-            // Search Field & Filter Header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _showTrashOnly
-                        ? Text.rich(
+                  // Search Field & Filter Header
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 24.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _showTrashOnly
+                              ? Text.rich(
                             TextSpan(
                               text: context.l10n('trash_title'),
                               style: const TextStyle(
@@ -588,7 +572,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           )
-                        : Text.rich(
+                              : Text.rich(
                             TextSpan(
                               text: context.l10n('dashboard_title'),
                               style: const TextStyle(
@@ -597,7 +581,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.white,
                               ),
                               children: [
-                                TextSpan(
+                                const TextSpan(
                                   text: 'NanoUrls',
                                   style: TextStyle(
                                     color: AppColors.primary,
@@ -606,204 +590,204 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: _buildStatBadge(
-                            icon: SvgPicture.asset('assets/svg/logo.svg', width: 14, height: 14),
-                            count: '$_urlsLeft',
-                            tooltip: context.l10n('links_available', args: [_urlsLeft]),
+                          const SizedBox(height: 16.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: _buildStatBadge(
+                                  icon: SvgPicture.asset('assets/svg/logo.svg', width: 14, height: 14),
+                                  count: '$_urlsLeft',
+                                  tooltip: context.l10n('links_available', args: [_urlsLeft]),
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: _buildStatBadge(
+                                  icon: const Icon(Icons.bar_chart, color: AppColors.primary, size: 16),
+                                  count: '$_analyticsLeft',
+                                  tooltip: context.l10n('analytics_unlocked', args: [_analyticsLeft]),
+                                ),
+                              ),
+                              const SizedBox(width: 10.0),
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _showTrashOnly = !_showTrashOnly;
+                                    });
+                                  },
+                                  child: _buildStatBadge(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: _showTrashOnly ? Colors.redAccent : Colors.redAccent.withValues(alpha: 0.6),
+                                      size: 16,
+                                    ),
+                                    count: '$_trashCount',
+                                    tooltip: context.l10n('trash_mode_btn', args: [_trashCount]),
+                                    isActive: _showTrashOnly,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 10.0),
-                        Expanded(
-                          child: _buildStatBadge(
-                            icon: const Icon(Icons.bar_chart, color: AppColors.primary, size: 16),
-                            count: '$_analyticsLeft',
-                            tooltip: context.l10n('analytics_unlocked', args: [_analyticsLeft]),
-                          ),
-                        ),
-                        const SizedBox(width: 10.0),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
+                          const SizedBox(height: 16.0),
+
+                          TextField(
+                            onChanged: (val) {
                               setState(() {
-                                _showTrashOnly = !_showTrashOnly;
+                                _searchQuery = val;
                               });
                             },
-                            child: _buildStatBadge(
-                              icon: Icon(
-                                Icons.delete,
-                                color: _showTrashOnly ? Colors.redAccent : Colors.redAccent.withValues(alpha: 0.6),
-                                size: 16,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: context.l10n('search_hint'),
+                              prefixIcon: const Icon(Icons.search),
+                              fillColor: AppColors.surfaceInner,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0),
+                                borderSide: const BorderSide(color: AppColors.border, width: 1.0),
                               ),
-                              count: '$_trashCount',
-                              tooltip: context.l10n('trash_mode_btn', args: [_trashCount]),
-                              isActive: _showTrashOnly,
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16.0),
+                                borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 16.0),
+
+                          // Filter Controls: View Mode Toggle, Glyph Dropdown, Analytics, and Password
+                          Row(
+                            children: [
+                              _buildViewModeToggle(),
+                              const SizedBox(width: 8.0),
+                              Expanded(
+                                child: _buildGlyphDropdown(),
+                              ),
+                              const SizedBox(width: 8.0),
+                              _buildAnalyticsToggle(),
+                              const SizedBox(width: 8.0),
+                              _buildPasswordToggle(),
+                            ],
+                          ),
+                          const SizedBox(height: 16.0),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 16.0),
-                    
-                    TextField(
-                      onChanged: (val) {
-                        setState(() {
-                          _searchQuery = val;
-                        });
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: context.l10n('search_hint'),
-                        prefixIcon: const Icon(Icons.search),
-                        fillColor: AppColors.surfaceInner,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                          borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                  ),
+
+                  // Dynamic lists of cards or loading state
+                  if (_isLoading)
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 48.0),
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
                         ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16.0),
-                          borderSide: const BorderSide(color: AppColors.border, width: 1.0),
+                      ),
+                    )
+                  else if (filteredList.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(40.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _searchQuery.isNotEmpty ? Icons.search_off : Icons.link_off,
+                                size: 64,
+                                color: Colors.white12,
+                              ),
+                              const SizedBox(height: 16.0),
+                              Text(
+                                _searchQuery.isNotEmpty
+                                    ? context.l10n('empty_urls_title_search')
+                                    : (_showTrashOnly ? context.l10n('empty_trash_title') : context.l10n('empty_urls_title')),
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white38,
+                                ),
+                              ),
+                              const SizedBox(height: 6.0),
+                              Text(
+                                _searchQuery.isNotEmpty
+                                    ? context.l10n('empty_urls_desc_search')
+                                    : (_showTrashOnly ? context.l10n('empty_urls_desc_trash') : context.l10n('empty_urls_desc')),
+                                style: const TextStyle(
+                                  fontSize: 13.0,
+                                  color: AppColors.textMuted,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                            if (_isAdIndex(index, filteredList.length)) {
+                              return NativeAdCard(key: ValueKey('ad_$index'));
+                            }
+                            final urlIndex = _getUrlIndex(index, filteredList.length);
+                            if (urlIndex >= filteredList.length) {
+                              return const SizedBox.shrink();
+                            }
+                            final item = filteredList[urlIndex];
+                            return UrlCard(
+                              key: ValueKey(item.shortUrl),
+                              url: item,
+                              isCompact: _isCompactViewMode,
+                              onDetails: () {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/url-info',
+                                  arguments: item,
+                                );
+                              },
+                              onQrCode: () {
+                                // Track action for ad count
+                                AdmobController.instance.trackAction(context);
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => QrCodeDialog(url: item),
+                                );
+                              },
+                              onAnalytics: () {
+                                Navigator.of(context).pushNamed(
+                                  '/details',
+                                  arguments: item.shortUrl,
+                                );
+                              },
+                              onEdit: () => _editUrl(item),
+                              onDelete: () => _deleteUrl(item),
+                              onRestore: () => _restoreUrl(item),
+                            );
+                          },
+                          childCount: _getListItemCount(filteredList.length),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16.0),
 
-                    // Filter Controls: View Mode Toggle, Glyph Dropdown, Analytics, and Password
-                    Row(
-                      children: [
-                        _buildViewModeToggle(),
-                        const SizedBox(width: 8.0),
-                        Expanded(
-                          child: _buildGlyphDropdown(),
-                        ),
-                        const SizedBox(width: 8.0),
-                        _buildAnalyticsToggle(),
-                        const SizedBox(width: 8.0),
-                        _buildPasswordToggle(),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                  ],
-                ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 32.0),
+                  ),
+                ],
               ),
             ),
-
-            // Dynamic lists of cards or loading state
-            if (_isLoading)
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 48.0),
-                    child: CircularProgressIndicator(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              )
-            else if (filteredList.isEmpty)
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _searchQuery.isNotEmpty ? Icons.search_off : Icons.link_off,
-                          size: 64,
-                          color: Colors.white12,
-                        ),
-                        const SizedBox(height: 16.0),
-                        Text(
-                          _searchQuery.isNotEmpty 
-                              ? context.l10n('empty_urls_title_search') 
-                              : (_showTrashOnly ? context.l10n('empty_trash_title') : context.l10n('empty_urls_title')),
-                          style: const TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white38,
-                          ),
-                        ),
-                        const SizedBox(height: 6.0),
-                        Text(
-                          _searchQuery.isNotEmpty 
-                              ? context.l10n('empty_urls_desc_search') 
-                              : (_showTrashOnly ? context.l10n('empty_urls_desc_trash') : context.l10n('empty_urls_desc')),
-                          style: const TextStyle(
-                            fontSize: 13.0,
-                            color: AppColors.textMuted,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (_isAdIndex(index, filteredList.length)) {
-                        return NativeAdCard(key: ValueKey('ad_$index'));
-                      }
-                      final urlIndex = _getUrlIndex(index, filteredList.length);
-                      if (urlIndex >= filteredList.length) {
-                        return const SizedBox.shrink();
-                      }
-                      final item = filteredList[urlIndex];
-                      return UrlCard(
-                        key: ValueKey(item.shortUrl),
-                        url: item,
-                        isCompact: _isCompactViewMode,
-                        onDetails: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/url-info',
-                            arguments: item,
-                          );
-                        },
-                        onQrCode: () {
-                          // Track action for ad count
-                          AdmobController.instance.trackAction(context);
-                          showDialog(
-                            context: context,
-                            builder: (context) => QrCodeDialog(url: item),
-                          );
-                        },
-                        onAnalytics: () {
-                          Navigator.of(context).pushNamed(
-                            '/details',
-                            arguments: item.shortUrl,
-                          );
-                        },
-                        onEdit: () => _editUrl(item),
-                        onDelete: () => _deleteUrl(item),
-                        onRestore: () => _restoreUrl(item),
-                      );
-                    },
-                    childCount: _getListItemCount(filteredList.length),
-                  ),
-                ),
-              ),
-            
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 32.0),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textLight,
@@ -814,13 +798,13 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: AdmobController.instance.adsDisabled
           ? null
           : const SafeArea(
-              child: SizedBox(
-                height: 50,
-                child: Center(
-                  child: BannerAdWidget(),
-                ),
-              ),
-            ),
+        child: SizedBox(
+          height: 50,
+          child: Center(
+            child: BannerAdWidget(),
+          ),
+        ),
+      ),
     );
   }
 
@@ -836,8 +820,8 @@ class _HomeScreenState extends State<HomeScreen> {
         color: isActive ? AppColors.primary.withValues(alpha: 0.08) : AppColors.surface,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: isActive 
-              ? AppColors.primary.withValues(alpha: 0.4) 
+          color: isActive
+              ? AppColors.primary.withValues(alpha: 0.4)
               : AppColors.border,
           width: 1.0,
         ),
