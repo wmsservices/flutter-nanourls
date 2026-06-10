@@ -48,21 +48,33 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     // Repeat the pulse back and forth
     _controller.repeat(reverse: true);
 
-    // Initialize Mobile Ads SDK & Tracking Permissions
-    AdmobController.instance.init();
-
-    // Process auto-login check
-    _checkAutoLogin();
+    // Process initialization and auto-login check after frame rendering
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAppAndCheckAutoLogin();
+    });
   }
 
-  Future<void> _checkAutoLogin() async {
+  Future<void> _initializeAppAndCheckAutoLogin() async {
     final startTime = DateTime.now();
     bool loginSuccess = false;
     bool hasSeenOnboarding = false;
     String? emailToPrefill;
     String? loginError;
 
-    // Request push notification permissions on app startup
+    // 1. Aguarda um delay para garantir que a interface do iOS esteja totalmente visível e ativa (UIApplicationStateActive)
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    // 2. Inicializa o Mobile Ads SDK e solicita permissão de rastreamento (ATT) via AdmobController
+    try {
+      await AdmobController.instance.init();
+    } catch (_) {
+      // Ignora se falhar
+    }
+
+    // 3. Aguarda um pequeno delay (800ms) para permitir a transição suave do diálogo de ATT antes do próximo prompt
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // 4. Solicita permissão para notificações push (FCM) após o encerramento do diálogo de ATT
     try {
       final messaging = FirebaseMessaging.instance;
       await messaging.requestPermission(
@@ -75,9 +87,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         sound: true,
       );
     } catch (_) {
-      // Ignored if platform doesn't support messaging or if it fails
+      // Ignora se a plataforma não suportar ou se a requisição falhar
     }
 
+    // 5. Processa a verificação de auto-login e leitura do SharedPreferences
     try {
       final prefs = await SharedPreferences.getInstance();
       hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
@@ -91,7 +104,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           final password = crypto.decryptPassword(encryptedPassword);
           emailToPrefill = email;
 
-          // Attempt API sign in
+          // Tentativa de login na API
           final apiService = ApiService();
           await apiService.signIn(email, password);
           loginSuccess = true;
@@ -99,14 +112,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       }
     } catch (e) {
       loginError = e.toString().replaceAll('HttpException: ', '').replaceAll('Exception: ', '');
-      // Clear saved password on failure so we don't try again next time
+      // Limpa a senha salva em caso de falha para evitar novas tentativas incorretas
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('saved_password');
       } catch (_) {}
     }
 
-    // Ensure splash screen is shown for at least 2500ms for premium feels
+    // 6. Garante que a Splash Screen seja exibida por pelo menos 2500ms no total para preservar a fluidez visual
     final elapsed = DateTime.now().difference(startTime);
     final remainingDelay = const Duration(milliseconds: 2500) - elapsed;
     if (remainingDelay > Duration.zero) {

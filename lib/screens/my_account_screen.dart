@@ -335,44 +335,28 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
   // Delete Account permanently flow
   Future<void> _deleteAccount() async {
-    final currentPassword = await showDialog<String>(
+    final user = _sessionManager.currentUser;
+    if (user == null) return;
+
+    final decryptedEmail = _getDecryptedEmail(user.email);
+
+    final confirmed = await showDialog<dynamic>(
       context: context,
       builder: (context) => ConfirmActionDialog(
         title: context.l10n('delete_account_dialog_title'),
         message: context.l10n('delete_account_dialog_message'),
         confirmText: context.l10n('delete_account_dialog_btn'),
         isDanger: true,
-        requirePassword: true, // Adicionado para exigir e validar a senha na exclusão da conta
+        requireEmail: true, // Solicita a digitação do e-mail cadastrado
+        expectedEmail: decryptedEmail, // Valida se coincide com o cadastrado
       ),
     );
 
-    if (currentPassword == null) return;
-
-    final user = _sessionManager.currentUser;
-    if (user == null) return;
+    if (confirmed != true) return;
 
     setState(() {
       _isDeletingAccount = true;
     });
-
-    try {
-      // Verify password against backend using signin API to avoid CPU-intensive local PBKDF2 hashing delays
-      final decryptedEmail = _getDecryptedEmail(user.email);
-      await _apiService.signIn(decryptedEmail, currentPassword);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n('confirm_action_dialog_wrong_password')),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
-      setState(() {
-        _isDeletingAccount = false;
-      });
-      return;
-    }
 
     try {
       await _apiService.deleteAccount();
