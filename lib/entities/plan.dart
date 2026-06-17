@@ -9,6 +9,7 @@ class Plan {
   final bool isAnnual;
   final bool enabeld;
   final double price;
+  final bool showAds;
 
   Plan({
     required this.planId,
@@ -20,6 +21,7 @@ class Plan {
     required this.isAnnual,
     required this.enabeld,
     required this.price,
+    required this.showAds
   });
 
   factory Plan.fromJson(Map<String, dynamic> json) {
@@ -33,6 +35,7 @@ class Plan {
       isAnnual: json['isAnnual'] ?? false,
       enabeld: json['enabeld'] ?? true,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      showAds: json['showAds'] ?? (json['planId'] == 1)
     );
   }
 
