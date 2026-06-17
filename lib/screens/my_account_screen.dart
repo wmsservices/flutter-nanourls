@@ -85,7 +85,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     });
 
     try {
-      final fetchedPlan = await _apiService.fetchPlanById(user.planId);
+      final fetchedPlan = await _apiService.fetchPlanById(user.planId.toString());
       setState(() {
         _plan = fetchedPlan;
         _isLoadingPlan = false;
@@ -834,7 +834,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     }
 
     final plan = _plan!;
-    final linksStr = plan.maxLinks == -1 ? context.l10n('unlimited_links') : context.l10n('max_links_limit', args: [plan.maxLinks]);
+    final linksStr = plan.linksPerMonth == -1 ? context.l10n('unlimited_links') : context.l10n('max_links_limit', args: [plan.linksPerMonth]);
     final analyticsStr = plan.maxAnalytics == -1 ? context.l10n('unlimited_analytics') : context.l10n('max_analytics_limit', args: [plan.maxAnalytics]);
 
     return Container(
@@ -871,9 +871,37 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
           _buildPlanFeatureRow(linksStr),
           _buildPlanFeatureRow(analyticsStr),
           if (plan.hasDetailedAnalytics) _buildPlanFeatureRow(context.l10n('features_geo')),
-          if (plan.hasCustomDomain) _buildPlanFeatureRow(context.l10n('features_domain')),
-          if (plan.hasCustomQrCode) _buildPlanFeatureRow(context.l10n('features_qr')),
-          if (plan.hasApiAccess) _buildPlanFeatureRow(context.l10n('features_api')),
+          const SizedBox(height: 20.0),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () async {
+                final changed = await Navigator.of(context).pushNamed('/plans');
+                if (changed == true) {
+                  _loadUserPlan();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white.withValues(alpha: 0.08),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.swap_horiz, size: 18),
+                  const SizedBox(width: 8),
+                  Text(context.l10n('Plans_Title')),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

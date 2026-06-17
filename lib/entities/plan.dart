@@ -1,60 +1,51 @@
 // Entity representing a user plan mapping the backend Plan model
 class Plan {
-  final int id;
+  final int planId;
+  final String package;
   final String name;
-  final int maxLinks;
+  final int linksPerMonth;
   final int maxAnalytics;
-  final bool hasCustomDomain;
   final bool hasDetailedAnalytics;
-  final bool hasCustomQrCode;
-  final bool hasApiAccess;
+  final bool isAnnual;
+  final bool enabeld;
   final double price;
-  final double yearPrice;
-  final bool enabled;
 
   Plan({
-    required this.id,
+    required this.planId,
+    required this.package,
     required this.name,
-    required this.maxLinks,
+    required this.linksPerMonth,
     required this.maxAnalytics,
-    required this.hasCustomDomain,
     required this.hasDetailedAnalytics,
-    required this.hasCustomQrCode,
-    required this.hasApiAccess,
+    required this.isAnnual,
+    required this.enabeld,
     required this.price,
-    required this.yearPrice,
-    required this.enabled,
   });
 
   factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
-      id: json['id'] ?? 0,
+      planId: json['planId'] ?? 0,
+      package: json['package'] ?? '',
       name: json['name'] ?? '',
-      maxLinks: json['maxLinks'] ?? 0,
+      linksPerMonth: json['linksPerMonth'] ?? 0,
       maxAnalytics: json['maxAnalytics'] ?? 0,
-      hasCustomDomain: json['hasCustomDomain'] ?? false,
       hasDetailedAnalytics: json['hasDetailedAnalytics'] ?? false,
-      hasCustomQrCode: json['hasCustomQrCode'] ?? false,
-      hasApiAccess: json['hasApiAccess'] ?? false,
+      isAnnual: json['isAnnual'] ?? false,
+      enabeld: json['enabeld'] ?? true,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      yearPrice: (json['yearPrice'] as num?)?.toDouble() ?? 0.0,
-      enabled: json['enabled'] ?? true,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'package': package,
       'name': name,
-      'maxLinks': maxLinks,
+      'linksPerMonth': linksPerMonth,
       'maxAnalytics': maxAnalytics,
-      'hasCustomDomain': hasCustomDomain,
       'hasDetailedAnalytics': hasDetailedAnalytics,
-      'hasCustomQrCode': hasCustomQrCode,
-      'hasApiAccess': hasApiAccess,
+      'isAnnual': isAnnual,
+      'enabeld': enabeld,
       'price': price,
-      'yearPrice': yearPrice,
-      'enabled': enabled,
     };
   }
 }

@@ -76,7 +76,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     });
   }
 
-  Widget _buildCardCompactChild(DashboardDataDto _data) {
+  Widget _buildCardCompactChild(DashboardDataDto data) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,7 +88,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               Text(context.l10n('short_code'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
               const SizedBox(height: 4.0),
               Text(
-                _data.shortCode,
+                data.shortCode,
                 style: const TextStyle(
                   fontSize: 22.0,
                   fontWeight: FontWeight.bold,
@@ -133,7 +133,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildCardFullChild(DashboardDataDto _data) {
+  Widget _buildCardFullChild(DashboardDataDto data) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -149,7 +149,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   Text(context.l10n('short_code'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4.0),
                   Text(
-                    _data.shortCode,
+                    data.shortCode,
                     style: const TextStyle(
                       fontSize: 22.0,
                       fontWeight: FontWeight.bold,
@@ -160,6 +160,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ),
                 ],
               ),
+
             ),
             const SizedBox(width: 8.0),
             // Status Badge
@@ -198,9 +199,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         Text(context.l10n('original_url'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4.0),
         InkWell(
-          onTap: () => _copyToClipboard(_data.targetUrl),
+          onTap: () => _copyToClipboard(data.targetUrl),
           child: Text(
-            _data.targetUrl,
+            data.targetUrl,
             style: const TextStyle(color: Colors.white, fontSize: 14.0, decoration: TextDecoration.underline),
             overflow: TextOverflow.ellipsis,
             maxLines: 2,
@@ -216,14 +217,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           children: [
             Expanded(
               child: Text(
-                _data.shortGoUrl,
+                data.shortGoUrl,
                 style: const TextStyle(color: AppColors.primary, fontSize: 15.0, fontWeight: FontWeight.bold),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             IconButton(
               icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
-              onPressed: () => _copyToClipboard(_data.shortGoUrl),
+              onPressed: () => _copyToClipboard(data.shortGoUrl),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
@@ -232,7 +233,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         const SizedBox(height: 16.0),
 
         // Link Encurtado Alternativo (ME)
-        if (_data.shortMeUrl.isNotEmpty) ...[
+        if (data.shortMeUrl.isNotEmpty) ...[
           Text(context.l10n('alt_shortlink'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4.0),
           Row(
@@ -240,14 +241,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             children: [
               Expanded(
                 child: Text(
-                  _data.shortMeUrl,
+                  data.shortMeUrl,
                   style: const TextStyle(color: AppColors.primary, fontSize: 15.0, fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.copy, size: 18, color: Colors.white70),
-                onPressed: () => _copyToClipboard(_data.shortMeUrl),
+                onPressed: () => _copyToClipboard(data.shortMeUrl),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
@@ -257,11 +258,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ],
 
         // Description
-        if (_data.description.isNotEmpty) ...[
+        if (data.description.isNotEmpty) ...[
           Text(context.l10n('description'), style: const TextStyle(color: AppColors.textMuted, fontSize: 12.0, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4.0),
           Text(
-            _data.description,
+            data.description,
             style: const TextStyle(color: Colors.white70, fontSize: 13.0),
             overflow: TextOverflow.ellipsis,
             maxLines: 3,
@@ -281,19 +282,19 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 Text(context.l10n('created_at'), style: const TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 2.0),
                 Text(
-                  _formatDate(_data.createdDate),
+                  _formatDate(data.createdDate),
                   style: const TextStyle(color: Colors.white70, fontSize: 12.0),
                 ),
               ],
             ),
-            if (!_isSameDay(_data.createdDate, _data.lastModifiedDate))
+            if (!_isSameDay(data.createdDate, data.lastModifiedDate))
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(context.l10n('modified_at'), style: const TextStyle(color: AppColors.textMuted, fontSize: 11.0, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 2.0),
                   Text(
-                    _formatDate(_data.lastModifiedDate),
+                    _formatDate(data.lastModifiedDate),
                     style: const TextStyle(color: Colors.white70, fontSize: 12.0),
                   ),
                 ],

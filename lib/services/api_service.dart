@@ -327,12 +327,41 @@ class ApiService {
   }
 
   // Obtém as informações descritivas do plano de assinatura pelo ID
-  Future<Plan> fetchPlanById(int planId) async {
+  Future<Plan> fetchPlanById(String planId) async {
     final url = Uri.parse('$_baseUrl/v1/plan/get-by-id/$planId');
     try {
       final response = await http.get(url, headers: _buildHeaders(requiresAuth: true));
       final data = _handleResponse(response);
       return Plan.fromJson(data);
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    }
+  }
+
+  // Obtém todos os planos ativos cadastrados
+  Future<List<Plan>> fetchActivePlans() async {
+    final url = Uri.parse('$_baseUrl/v1/plan/get-active');
+    try {
+      final response = await http.get(url, headers: _buildHeaders(requiresAuth: true));
+      final List<dynamic> listJson = _handleResponse(response);
+      return listJson.map((item) => Plan.fromJson(item)).toList();
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    }
+  }
+
+  // Altera o plano ativo do usuário
+  Future<User> changePlan(String planId) async {
+    final url = Uri.parse('$_baseUrl/v1/user/change-plan/$planId');
+    try {
+      final response = await http.put(url, headers: _buildHeaders(requiresAuth: true));
+      final data = _handleResponse(response);
+
+      final newToken = data['token'] as String;
+      final updatedUser = User.fromJson(data['user']);
+
+      _sessionManager.saveSession(newToken, updatedUser);
+      return updatedUser;
     } on SocketException {
       throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
     }

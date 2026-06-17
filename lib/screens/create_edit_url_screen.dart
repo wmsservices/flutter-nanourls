@@ -597,7 +597,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                             ),
                             Switch(
                               value: _checkExpires,
-                              activeColor: AppColors.primary,
+                              activeThumbColor: AppColors.primary,
                               onChanged: (val) {
                                 setState(() {
                                   _checkExpires = val;
@@ -627,7 +627,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    '${_expiresAt!.toLocal().toString().substring(0, 16)}',
+                                    _expiresAt!.toLocal().toString().substring(0, 16),
                                     style: const TextStyle(color: Colors.white, fontSize: 13.0),
                                   ),
                                   const Icon(Icons.calendar_month, color: AppColors.primary, size: 18),
@@ -673,7 +673,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                             ),
                             Switch(
                               value: _checkPassword,
-                              activeColor: AppColors.primary,
+                              activeThumbColor: AppColors.primary,
                               onChanged: (val) {
                                 setState(() {
                                   _checkPassword = val;
@@ -736,7 +736,7 @@ class _CreateEditUrlScreenState extends State<CreateEditUrlScreen> {
                         ),
                         Switch(
                           value: _analytics,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                           onChanged: (val) {
                             setState(() {
                               _analytics = val;

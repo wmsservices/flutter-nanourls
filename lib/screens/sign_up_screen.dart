@@ -673,7 +673,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           child: RichText(
                             text: TextSpan(
-                              text: context.l10n('already_have_account') + ' ',
+                              text: '${context.l10n('already_have_account')} ',
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontFamily: 'SplineSans',

@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
+
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
@@ -12,9 +15,30 @@ import 'screens/create_edit_url_screen.dart';
 import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/my_account_screen.dart';
+import 'screens/plans_screen.dart';
 import 'screens/forgot_pass_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'firebase_options.dart';
+
+/// Inicializa o SDK do RevenueCat configurando a plataforma correta.
+Future<void> initRevenueCat() async {
+  // Habilita logs detalhados para facilitar o debug em ambiente de desenvolvimento
+  await Purchases.setLogLevel(LogLevel.debug);
+
+  PurchasesConfiguration? configuration;
+
+  // Define a chave de API pública com base no sistema operacional do dispositivo
+  if (Platform.isAndroid) {
+    configuration = PurchasesConfiguration("goog_lMYvMOaDNQGHOcMOqkDzmMyJdss");
+  } else if (Platform.isIOS) {
+    configuration = PurchasesConfiguration("appl_oVJylrbeIqMOQJufOPwhOPuvIKS");
+  }
+
+  // Se a configuração for válida para a plataforma, aplica ao SDK
+  if (configuration != null) {
+    await Purchases.configure(configuration);
+  }
+}
 
 void main() async {
   // Garante que os bindings do Flutter estão inicializados antes de chamar código nativo
@@ -24,6 +48,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Inicializa o RevenueCat para gerenciamento de assinaturas e compras in-app
+  await initRevenueCat();
 
   runApp(const MyApp());
 }
@@ -73,6 +100,7 @@ class MyApp extends StatelessWidget {
         '/url-info': (context) => const UrlInfoScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/account': (context) => const MyAccountScreen(),
+        '/plans': (context) => const PlansScreen(),
         '/forgot-password': (context) => const ForgotPassScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
       },

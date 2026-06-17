@@ -22,10 +22,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
 
   void _copyToClipboard(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
+    final l10nMessage = context.l10n('link_copied', args: [widget.url.goLink]);
     Clipboard.setData(ClipboardData(text: widget.url.goLink)).then((_) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(context.l10n('link_copied', args: [widget.url.goLink])),
+          content: Text(l10nMessage),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 1),
         ),
@@ -34,6 +35,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
   }
 
   Future<void> _shareQrCode() async {
+    final l10nShareText = context.l10n('qr_share_text', args: [widget.url.shortUrl]);
+    final l10nDownloadFailed = context.l10n('qr_code_download_failed');
+    final box = context.findRenderObject() as RenderBox?;
+    final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+
     setState(() {
       _isSharing = true;
     });
@@ -49,18 +55,17 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
         final file = await File('${tempDir.path}/qrcode_${widget.url.shortUrl}.png').create();
         await file.writeAsBytes(response.bodyBytes);
 
-        final box = context.findRenderObject() as RenderBox?;
-        final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+        if (!mounted) return;
 
         await SharePlus.instance.share(
           ShareParams(
-            text: context.l10n('qr_share_text', args: [widget.url.shortUrl]),
+            text: l10nShareText,
             files: [XFile(file.path)],
             sharePositionOrigin: rect,
           ),
         );
       } else {
-        throw context.l10n('qr_code_download_failed');
+        throw l10nDownloadFailed;
       }
     } catch (e) {
       if (!mounted) return;
