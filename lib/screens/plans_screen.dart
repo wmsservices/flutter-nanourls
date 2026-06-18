@@ -749,6 +749,8 @@ class _PlansScreenState extends State<PlansScreen> {
             _buildFeatureRow(linksStr),
             _buildFeatureRow(analyticsStr),
             if (plan.hasDetailedAnalytics) _buildFeatureRow(context.l10n('Plans_Feat_DetailedAnalytics')),
+            if (!plan.showAds) _buildFeatureRow(context.l10n('Plans_Feat_NoAds')),
+            if (plan.fullWebAccess) _buildFeatureRow(context.l10n('Plans_Feat_FullWebAccess')),
 
             const SizedBox(height: 28),
             SizedBox(

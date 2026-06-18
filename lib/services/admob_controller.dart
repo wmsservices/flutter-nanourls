@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'session_manager.dart';
 
 // Centralized controller for managing AdMob ads, Tracking permissions and Easter Egg state
 class AdmobController extends ChangeNotifier {
@@ -18,7 +19,7 @@ class AdmobController extends ChangeNotifier {
   InterstitialAd? _interstitialAd;
   bool _isInterstitialAdLoading = false;
 
-  bool get adsDisabled => _adsDisabled;
+  bool get adsDisabled => _adsDisabled || !SessionManager().showAds;
   bool get isInitialized => _initialized;
 
   // Initialize the Mobile Ads SDK and tracking permission
@@ -60,7 +61,7 @@ class AdmobController extends ChangeNotifier {
 
   // Track action count to trigger Interstitial Ads
   void trackAction(BuildContext context) {
-    if (_adsDisabled) return;
+    if (adsDisabled) return;
     _actionCount++;
     if (_actionCount % 4 == 0) {
       _showInterstitialAd();
@@ -69,7 +70,7 @@ class AdmobController extends ChangeNotifier {
 
   // Preload an interstitial ad in the background
   void _loadInterstitialAd() {
-    if (_adsDisabled || _isInterstitialAdLoading || _interstitialAd != null) return;
+    if (adsDisabled || _isInterstitialAdLoading || _interstitialAd != null) return;
     _isInterstitialAdLoading = true;
 
     final adUnitId = kDebugMode
@@ -111,7 +112,7 @@ class AdmobController extends ChangeNotifier {
 
   // Display the preloaded Interstitial Ad
   void _showInterstitialAd() {
-    if (_adsDisabled || _interstitialAd == null) {
+    if (adsDisabled || _interstitialAd == null) {
       // If not loaded, reload in the background
       if (_interstitialAd == null) {
         _loadInterstitialAd();
@@ -119,5 +120,14 @@ class AdmobController extends ChangeNotifier {
       return;
     }
     _interstitialAd!.show();
+  }
+
+  // Called when user session/plan status updates to clean up ads and notify listeners
+  void onAdsStatusChanged() {
+    if (adsDisabled) {
+      _interstitialAd?.dispose();
+      _interstitialAd = null;
+    }
+    notifyListeners();
   }
 }
