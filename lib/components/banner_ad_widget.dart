@@ -33,6 +33,10 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
           _isAdLoaded = false;
         });
       }
+    } else {
+      if (mounted && _bannerAd == null && !_isAdLoaded) {
+        _loadAd();
+      }
     }
   }
 

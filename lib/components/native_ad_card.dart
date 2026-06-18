@@ -34,6 +34,10 @@ class _NativeAdCardState extends State<NativeAdCard> {
           _isAdLoaded = false;
         });
       }
+    } else {
+      if (mounted && _nativeAd == null && !_isAdLoaded) {
+        _loadAd();
+      }
     }
   }
 

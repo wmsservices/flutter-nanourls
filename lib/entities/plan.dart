@@ -37,8 +37,8 @@ class Plan {
       isAnnual: json['isAnnual'] ?? false,
       enabeld: json['enabeld'] ?? true,
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      showAds: json['showAds'] ?? (json['planId'] == 1),
-      fullWebAccess: json['fullWebAccess'] ?? (json['planId'] > 1),
+      showAds: json['package'] == 'free' ? true : (json['showAds'] ?? false),
+      fullWebAccess: json['package'] != 'free' ? true : (json['fullWebAccess'] ?? false),
     );
   }
 
