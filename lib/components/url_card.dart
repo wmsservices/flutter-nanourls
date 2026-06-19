@@ -90,7 +90,7 @@ class _UrlCardState extends State<UrlCard> {
     final goLink = widget.url.goLink;
 
     if (meLink == null || meLink.isEmpty) {
-      _shareLink(context, context.l10n('share_text_prefix', args: [goLink]));
+      _shareLink(context, goLink);
       return;
     }
 
@@ -122,7 +122,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, context.l10n('share_text_prefix', args: [goLink]));
+                    _shareLink(context, goLink);
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
@@ -173,7 +173,7 @@ class _UrlCardState extends State<UrlCard> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(sheetContext);
-                    _shareLink(context, context.l10n('share_text_prefix', args: [meLink]));
+                    _shareLink(context, meLink);
                   },
                   borderRadius: BorderRadius.circular(12.0),
                   child: Container(
