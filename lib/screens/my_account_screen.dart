@@ -227,6 +227,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
 
       if (isEmailChange) {
         // Force logout
+        _apiService.logout();
         _sessionManager.clearSession();
         // Clear saved credentials in SharedPreferences
         try {
@@ -309,6 +310,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       });
 
       // Force logout after password change
+      _apiService.logout();
       _sessionManager.clearSession();
       // Clear saved password in SharedPreferences
       try {

@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 import 'l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
@@ -43,6 +44,18 @@ Future<void> initRevenueCat() async {
 void main() async {
   // Garante que os bindings do Flutter estão inicializados antes de chamar código nativo
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Solicita permissão de rastreamento (ATT) no iOS antes de qualquer renderização
+  try {
+    if (Platform.isIOS) {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+    }
+  } catch (_) {
+    // Fallback silencioso se falhar
+  }
 
   // Inicializa o Firebase com as opções da plataforma atual
   await Firebase.initializeApp(

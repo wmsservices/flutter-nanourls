@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import '../entities/user.dart';
 import '../entities/nano_url.dart';
 import '../entities/plan.dart';
+import '../entities/device.dart';
 import '../dtos/dashboard_data_dto.dart';
 import 'session_manager.dart';
 import 'crypto_service.dart';
@@ -417,6 +418,30 @@ class ApiService {
       _sessionManager.clearSession();
     } on SocketException {
       throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    }
+  }
+
+  // Efetua logout na API passando o deviceId criptografado no body
+  Future<void> logout() async {
+    final url = Uri.parse('$_baseUrl/v1/user/log-out');
+    final payload = await _buildDeviceAndFcmPayload();
+    final device = Device(
+      deviceId: payload['deviceId'] as String,
+      userId: '',
+      tokenFcm: '',
+    );
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: _buildHeaders(requiresAuth: true),
+        body: jsonEncode(device.toJson()),
+      );
+      _handleResponse(response, validStatus: [200, 204]);
+    } on SocketException {
+      // Ignora erro de rede no logout para prosseguir com a limpeza local
+    } catch (_) {
+      // Ignora outros erros no logout para prosseguir com a limpeza local
     }
   }
 
