@@ -20,8 +20,8 @@ class _NativeAdCardState extends State<NativeAdCard> {
   void initState() {
     super.initState();
     _loadAd();
-    
-    // Listen to changes in AdmobController (e.g. if ads get disabled via Easter Egg)
+
+    // Monitora alterações de estado do controlador geral de anúncios
     AdmobController.instance.addListener(_handleAdmobStateChange);
   }
 
@@ -44,17 +44,19 @@ class _NativeAdCardState extends State<NativeAdCard> {
   void _loadAd() {
     if (AdmobController.instance.adsDisabled) return;
 
+    // Define o ID do bloco de anúncios baseando-se no ambiente (Debug/Production) e plataforma
     final adUnitId = kDebugMode
         ? (Platform.isAndroid
-            ? 'ca-app-pub-3940256099942544/2247696110' // Android Test Native Ad
-            : 'ca-app-pub-3940256099942544/3986694507') // iOS Test Native Ad
+        ? 'ca-app-pub-3940256099942544/2247696110' // ID de teste nativo do Android
+        : 'ca-app-pub-3940256099942544/3986624511') // ID de teste nativo padrão do iOS corrigido
         : (Platform.isAndroid
-            ? 'ca-app-pub-4671549534107534/8469174656' // Android Prod Native Ad
-            : 'ca-app-pub-4671549534107534/3481102084'); // iOS Prod Native Ad
+        ? 'ca-app-pub-4671549534107534/8469174656'
+        : 'ca-app-pub-4671549534107534/3481102084');
 
     _nativeAd = NativeAd(
       adUnitId: adUnitId,
       request: const AdRequest(),
+      // Utiliza o estilo de template nativo pré-configurado do próprio SDK do AdMob
       nativeTemplateStyle: NativeTemplateStyle(
         templateType: TemplateType.small,
         mainBackgroundColor: AppColors.surface,
