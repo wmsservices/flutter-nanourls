@@ -889,6 +889,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),

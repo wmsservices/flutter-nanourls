@@ -498,9 +498,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout, color: AppColors.primary),
             tooltip: context.l10n('logout_tooltip'),
             onPressed: () async {
+              final navigator = Navigator.of(context);
               await _apiService.logout();
               _sessionManager.clearSession();
-              Navigator.of(context).pushReplacementNamed('/login');
+              navigator.pushReplacementNamed('/login');
             },
           ),
         ],

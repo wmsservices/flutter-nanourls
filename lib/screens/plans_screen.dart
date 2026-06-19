@@ -832,6 +832,18 @@ class _PlansScreenState extends State<PlansScreen> {
           ),
         ),
         const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Text(
+            context.l10n('Plans_Notice_Terms'),
+            style: const TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: 32),
       ],
     );
   }
