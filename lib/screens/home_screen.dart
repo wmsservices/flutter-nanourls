@@ -133,13 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // Calculate trash count dynamically
   int get _trashCount => _urls.where((u) => !u.enabled).length;
 
-  // Prepends the new URL to the list and updates user remaining balance
-  void _addNewShortenedUrl(NanoUrl url) {
-    setState(() {
-      _urls.insert(0, url);
-      if (_urlsLeft > 0) _urlsLeft--;
-    });
-  }
+
 
   bool _checkUserEnabled() {
     final user = _sessionManager.currentUser;
@@ -159,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!_checkUserEnabled()) return;
     final result = await Navigator.pushNamed(context, '/create-edit');
     if (result is NanoUrl) {
-      _addNewShortenedUrl(result);
+      _loadDashboardData();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -265,12 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
       arguments: url,
     );
     if (result is NanoUrl) {
-      setState(() {
-        final index = _urls.indexWhere((u) => u.shortUrl == url.shortUrl);
-        if (index != -1) {
-          _urls[index] = result;
-        }
-      });
+      _loadDashboardData();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
