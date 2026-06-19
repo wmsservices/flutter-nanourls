@@ -3,15 +3,18 @@ import 'package:flutter/services.dart';
 import '../dtos/dashboard_data_dto.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
+import '../services/session_manager.dart';
 import '../theme/app_theme.dart';
 
 // Screen displaying stats and details of a selected shortened URL
 class AnalyticsScreen extends StatefulWidget {
   final String shortCode;
+  final DashboardDataDto? preloadedData;
 
   const AnalyticsScreen({
     super.key,
     required this.shortCode,
+    this.preloadedData,
   });
 
   @override
@@ -32,7 +35,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadAnalytics();
+    if (widget.preloadedData != null) {
+      _analyticsData = widget.preloadedData;
+      _isLoading = false;
+      _isFirstLoad = false;
+    } else {
+      _loadAnalytics();
+    }
   }
 
   Future<void> _loadAnalytics() async {
@@ -504,7 +513,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ),
                     ),
                     const Divider(color: AppColors.borderSubtle, height: 1.0),
-                    ListView.separated(
+                    if (SessionManager().currentUser?.planId == 1)
+                      _buildLockedPlaceholder(context)
+                    else
+                      ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _data.referrers.isEmpty ? 1 : _data.referrers.length,
@@ -580,7 +592,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 16.0),
-                      if (_data.locations.isEmpty)
+                      if (SessionManager().currentUser?.planId == 1)
+                        _buildLockedPlaceholder(context)
+                      else if (_data.locations.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -616,7 +630,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const SizedBox(height: 16.0),
-                      if (_data.topCities.isEmpty)
+                      if (SessionManager().currentUser?.planId == 1)
+                        _buildLockedPlaceholder(context)
+                      else if (_data.topCities.isEmpty)
                         Center(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -823,6 +839,71 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               backgroundColor: AppColors.surfaceInner,
               valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
               minHeight: 6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLockedPlaceholder(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.lock_outline,
+              color: AppColors.primary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n('analytics_locked_title'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.l10n('analytics_locked_desc'),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12.0,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/plans');
+            },
+            icon: const Icon(Icons.star, size: 16),
+            label: Text(context.l10n('analytics_locked_btn')),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.textLight,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(999),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              textStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

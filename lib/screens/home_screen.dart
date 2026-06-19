@@ -170,6 +170,92 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _navigateToAnalytics(String shortCode) async {
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    // Show a loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        );
+      },
+    );
+
+    try {
+      final stats = await _apiService.fetchUrlAnalytics(shortCode, days: 7);
+      
+      // Dismiss the loading dialog
+      navigator.pop();
+
+      if (stats.totalClicks == 0) {
+        if (!mounted) return;
+        // Show an alert/dialog saying there are no clicks yet
+        showDialog(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              backgroundColor: AppColors.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: AppColors.border),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: AppColors.primary, size: 28),
+                  const SizedBox(width: 8),
+                  Text(
+                    context.l10n('analytics_no_clicks_title'),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                ],
+              ),
+              content: Text(
+                context.l10n('analytics_no_clicks_desc'),
+                style: const TextStyle(color: AppColors.textMuted, height: 1.4, fontSize: 14),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textLight,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: Text(context.l10n('close')),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        navigator.pushNamed(
+          '/details',
+          arguments: {
+            'shortCode': shortCode,
+            'preloadedData': stats,
+          },
+        );
+      }
+    } catch (e) {
+      // Dismiss the loading dialog
+      navigator.pop();
+      
+      if (!mounted) return;
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text("${context.l10n('error')}: $e"),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   // Triggers screen to edit metadata of a link using route navigation
   Future<void> _editUrl(NanoUrl url) async {
     if (!_checkUserEnabled()) return;
@@ -766,10 +852,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 );
                               },
                               onAnalytics: () {
-                                Navigator.of(context).pushNamed(
-                                  '/details',
-                                  arguments: item.shortUrl,
-                                );
+                                _navigateToAnalytics(item.shortUrl);
                               },
                               onEdit: () => _editUrl(item),
                               onDelete: () => _deleteUrl(item),

@@ -289,6 +289,11 @@ class AppLocalizations {
       'Plans_Modal_Cancel': 'Cancel',
       'Plans_Modal_Confirm': 'Confirm',
       'Plans_Notice_Terms': 'Prices and plans are subject to change at the discretion of NanoUrls.',
+      'analytics_no_clicks_title': 'No Clicks Yet',
+      'analytics_no_clicks_desc': 'This link hasn\'t received any clicks yet. Share it to unlock analytics data!',
+      'analytics_locked_title': 'Detailed Analytics Locked',
+      'analytics_locked_desc': 'Upgrade to Pro or Max plan to unlock access referrers, country and city insights.',
+      'analytics_locked_btn': 'Upgrade Plan',
 
       // Components
       'confirm_action_dialog_title': 'Confirm Action',
@@ -652,6 +657,11 @@ class AppLocalizations {
       'Plans_Modal_Cancel': 'Cancelar',
       'Plans_Modal_Confirm': 'Confirmar',
       'Plans_Notice_Terms': 'Preços e planos estão sujeitos a alterações sob critérios da NanoUrls.',
+      'analytics_no_clicks_title': 'Sem Cliques Ainda',
+      'analytics_no_clicks_desc': 'Este link ainda não recebeu nenhum clique. Compartilhe-o para desbloquear os dados de análise!',
+      'analytics_locked_title': 'Métricas Detalhadas Bloqueadas',
+      'analytics_locked_desc': 'Assine o plano Pro ou Max para desbloquear origens de acesso, dados por país e cidade.',
+      'analytics_locked_btn': 'Fazer Upgrade',
 
       // Components
       'confirm_action_dialog_title': 'Confirmar Ação',
@@ -1015,6 +1025,11 @@ class AppLocalizations {
       'Plans_Modal_Cancel': 'Cancelar',
       'Plans_Modal_Confirm': 'Confirmar',
       'Plans_Notice_Terms': 'Los precios y planes están sujetos a cambios según el criterio de NanoUrls.',
+      'analytics_no_clicks_title': 'Sin Clics Aún',
+      'analytics_no_clicks_desc': 'Este enlace aún no ha recibido clics. ¡Compártelo para desbloquear los datos de análisis!',
+      'analytics_locked_title': 'Métricas Detalladas Bloqueadas',
+      'analytics_locked_desc': 'Actualiza al plan Pro o Max para desbloquear fuentes de acceso, datos por país y ciudad.',
+      'analytics_locked_btn': 'Actualizar Plan',
 
       // Components
       'confirm_action_dialog_title': 'Confirmar Acción',
@@ -1378,6 +1393,11 @@ class AppLocalizations {
       'Plans_Modal_Cancel': 'Annuler',
       'Plans_Modal_Confirm': 'Confirmer',
       'Plans_Notice_Terms': 'Les prix et les plans sont sujets à modification à la discrétion de NanoUrls.',
+      'analytics_no_clicks_title': 'Pas encore de clics',
+      'analytics_no_clicks_desc': 'Ce lien n\'a pas encore reçu de clics. Partagez-le pour débloquer les données d\'analyse !',
+      'analytics_locked_title': 'Analytiques Détaillées Bloquées',
+      'analytics_locked_desc': 'Passez au plan Pro ou Max pour débloquer les referrers, pays et villes.',
+      'analytics_locked_btn': 'Mettre à Niveau',
 
       // Components
       'confirm_action_dialog_title': 'Confirmer l\'Action',

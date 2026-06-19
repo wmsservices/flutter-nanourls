@@ -19,6 +19,7 @@ import 'screens/my_account_screen.dart';
 import 'screens/plans_screen.dart';
 import 'screens/forgot_pass_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'dtos/dashboard_data_dto.dart';
 import 'firebase_options.dart';
 
 /// Inicializa o SDK do RevenueCat configurando a plataforma correta.
@@ -118,12 +119,22 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => const OnboardingScreen(),
       },
 
-      // Lida com passagem de argumentos dinâmicos para a tela de detalhes
       onGenerateRoute: (settings) {
         if (settings.name == '/details') {
-          final shortCode = settings.arguments as String? ?? '';
+          String shortCode = '';
+          DashboardDataDto? preloadedData;
+          if (settings.arguments is String) {
+            shortCode = settings.arguments as String;
+          } else if (settings.arguments is Map<String, dynamic>) {
+            final args = settings.arguments as Map<String, dynamic>;
+            shortCode = args['shortCode'] as String? ?? '';
+            preloadedData = args['preloadedData'] as DashboardDataDto?;
+          }
           return MaterialPageRoute(
-            builder: (context) => AnalyticsScreen(shortCode: shortCode),
+            builder: (context) => AnalyticsScreen(
+              shortCode: shortCode,
+              preloadedData: preloadedData,
+            ),
             settings: settings,
           );
         }
