@@ -414,71 +414,78 @@ class _PlansScreenState extends State<PlansScreen> {
                 ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : _errorMessage != null
                     ? _buildErrorWidget()
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 16),
-                            Text(
-                              context.l10n('Plans_Header_Title'),
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 16),
+                          Text(
+                            context.l10n('Plans_Header_Title'),
+                            style: const TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              height: 1.2,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            child: Text(
+                              context.l10n('Plans_Header_Desc'),
                               style: const TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                height: 1.2,
+                                fontSize: 15,
+                                color: AppColors.textMuted,
+                                height: 1.4,
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 12),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                              child: Text(
-                                context.l10n('Plans_Header_Desc'),
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  color: AppColors.textMuted,
-                                  height: 1.4,
-                                ),
-                                textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+
+                          _buildBillingToggle(),
+
+                          const SizedBox(height: 16),
+
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(bottom: 24.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Loop sob os planos da API que não são anuais para agrupamento
+                                  ..._apiPlans.where((p) => !p.isAnnual).map((plan) {
+                                    // Localiza o package mensal correspondente
+                                    Package? monthlyPkg;
+                                    for (var pkg in _rcPackages) {
+                                      if (pkg.identifier == plan.package) {
+                                        monthlyPkg = pkg;
+                                        break;
+                                      }
+                                    }
+
+                                    // Localiza o package anual correspondente
+                                    Package? yearlyPkg;
+                                    final yearlyPackageName = plan.package.replaceAll('_monthly', '_annual');
+                                    for (var pkg in _rcPackages) {
+                                      if (pkg.identifier == yearlyPackageName) {
+                                        yearlyPkg = pkg;
+                                        break;
+                                      }
+                                    }
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                                      child: _buildPlanCard(plan, monthlyPkg, yearlyPkg),
+                                    );
+                                  }),
+
+                                  Center(child: _buildFooterSupport()),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 16),
-
-                            _buildBillingToggle(),
-
-                            const SizedBox(height: 16),
-
-                            // Loop sob os planos da API que não são anuais para agrupamento
-                            ..._apiPlans.where((p) => !p.isAnnual).map((plan) {
-                              // Localiza o package mensal correspondente
-                              Package? monthlyPkg;
-                              for (var pkg in _rcPackages) {
-                                if (pkg.identifier == plan.package) {
-                                  monthlyPkg = pkg;
-                                  break;
-                                }
-                              }
-
-                              // Localiza o package anual correspondente
-                              Package? yearlyPkg;
-                              final yearlyPackageName = plan.package.replaceAll('_monthly', '_annual');
-                              for (var pkg in _rcPackages) {
-                                if (pkg.identifier == yearlyPackageName) {
-                                  yearlyPkg = pkg;
-                                  break;
-                                }
-                              }
-
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                child: _buildPlanCard(plan, monthlyPkg, yearlyPkg),
-                              );
-                            }),
-
-                            Center(child: _buildFooterSupport()),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
           ),
           if (_isSubmitting)
