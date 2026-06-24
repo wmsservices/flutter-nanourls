@@ -37,182 +37,192 @@ class AboutNanoUrlsDialog extends StatelessWidget {
         side: const BorderSide(color: AppColors.border),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 28.0),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Logo with outer circle and neon glow
-          GestureDetector(
-            onTap: () {
-              AdmobController.instance.incrementEasterEggTaps(
-                context,
-                    () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.l10n('ads_disabled_session')),
-                      backgroundColor: AppColors.primary,
-                      duration: const Duration(seconds: 3),
+      // SingleChildScrollView evita o erro de "Bottom overflow" em telas menores ou com fontes escaladas
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Logo with outer circle and neon glow
+            GestureDetector(
+              onTap: () {
+                AdmobController.instance.incrementEasterEggTaps(
+                  context,
+                      () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.l10n('ads_disabled_session')),
+                        backgroundColor: AppColors.primary,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundDarker,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.15),
+                      blurRadius: 16.0,
+                      spreadRadius: 2.0,
                     ),
-                  );
-                },
-              );
-            },
-            child: Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundDarker,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.15),
-                    blurRadius: 16.0,
-                    spreadRadius: 2.0,
+                  ],
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+                ),
+                padding: const EdgeInsets.all(14),
+                child: SvgPicture.asset('assets/svg/logo.svg'),
+              ),
+            ),
+            const SizedBox(height: 18.0),
+
+            // App Title with styling
+            Text.rich(
+              TextSpan(
+                text: context.l10n('about_dialog_title'),
+                style: const TextStyle(
+                  fontFamily: 'SplineSans',
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                children: [
+                  const TextSpan(
+                    text: 'NanoUrls',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                    ),
                   ),
                 ],
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
               ),
-              padding: const EdgeInsets.all(14),
-              child: SvgPicture.asset('assets/svg/logo.svg'),
             ),
-          ),
-          const SizedBox(height: 18.0),
+            const SizedBox(height: 4.0),
 
-          // App Title with styling
-          Text.rich(
-            TextSpan(
-              text: context.l10n('about_dialog_title'),
+            // Version Number
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final versionStr = snapshot.hasData
+                    ? context.l10n('about_dialog_version', args: [snapshot.data!.version])
+                    : '...';
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(9999),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+                  ),
+                  child: Text(
+                    versionStr,
+                    style: const TextStyle(
+                      fontFamily: 'SplineSans',
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 20.0),
+
+            // Description
+            Text(
+              context.l10n('about_dialog_desc'),
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'SplineSans',
-                fontSize: 22.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textMuted,
+                fontSize: 14.0,
+                height: 1.4,
               ),
-              children: [
-                const TextSpan(
-                  text: 'NanoUrls',
-                  style: TextStyle(
-                    color: AppColors.primary,
+            ),
+            const SizedBox(height: 16.0),
+            const Divider(color: Colors.white10, height: 1),
+            const SizedBox(height: 16.0),
+
+            // Details List
+            _buildDetailRow(Icons.offline_bolt_outlined, context.l10n('about_feature_performance')),
+            _buildDetailRow(Icons.security_outlined, context.l10n('about_feature_security')),
+            _buildDetailRow(Icons.qr_code_2_outlined, context.l10n('about_feature_qr')),
+            _buildDetailRow(Icons.analytics_outlined, context.l10n('about_feature_analytics')),
+
+            const SizedBox(height: 24.0),
+
+            // Close button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textLight,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(9999),
                   ),
                 ),
-              ],
+                child: Text(context.l10n('close')),
+              ),
             ),
-          ),
-          const SizedBox(height: 4.0),
+            const SizedBox(height: 12.0),
 
-          // Version Number
-          FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              final versionStr = snapshot.hasData
-                  ? context.l10n('about_dialog_version', args: [snapshot.data!.version])
-                  : '...';
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(9999),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+            // Footer - Utilizando o Shrink to Fit para evitar overflow horizontal
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                context.l10n('about_dialog_copyright'),
+                style: const TextStyle(
+                  fontFamily: 'SplineSans',
+                  color: Colors.white38,
+                  fontSize: 11.0,
                 ),
-                child: Text(
-                  versionStr,
-                  style: const TextStyle(
-                    fontFamily: 'SplineSans',
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 12.0),
+
+            // --- Apple Guideline Links ---
+            // Utilizando o Shrink to Fit também para garantir a estabilidade da linha
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () => _launchURL(context, 'https://nanourls.com/Terms'),
+                    child: const Text(
+                      'Terms of Use (EULA)',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: 20.0),
-
-          // Description
-          Text(
-            context.l10n('about_dialog_desc'),
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'SplineSans',
-              color: AppColors.textMuted,
-              fontSize: 14.0,
-              height: 1.4,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          const Divider(color: Colors.white10, height: 1),
-          const SizedBox(height: 16.0),
-
-          // Details List
-          _buildDetailRow(Icons.offline_bolt_outlined, context.l10n('about_feature_performance')),
-          _buildDetailRow(Icons.security_outlined, context.l10n('about_feature_security')),
-          _buildDetailRow(Icons.qr_code_2_outlined, context.l10n('about_feature_qr')),
-          _buildDetailRow(Icons.analytics_outlined, context.l10n('about_feature_analytics')),
-
-          const SizedBox(height: 24.0),
-
-          // Close button
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.textLight,
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(9999),
-                ),
-              ),
-              child: Text(context.l10n('close')),
-            ),
-          ),
-          const SizedBox(height: 12.0),
-
-          // Footer
-          Text(
-            context.l10n('about_dialog_copyright'),
-            style: const TextStyle(
-              fontFamily: 'SplineSans',
-              color: Colors.white38,
-              fontSize: 11.0,
-            ),
-          ),
-          const SizedBox(height: 12.0),
-
-          // --- Apple Guideline Links ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () => _launchURL(context, 'https://nanourls.com/Terms'),
-                child: const Text(
-                  'Terms of Use (EULA)',
-                  style: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 11,
-                    decoration: TextDecoration.underline,
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('|', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
                   ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text('|', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
-              ),
-              GestureDetector(
-                onTap: () => _launchURL(context, 'https://nanourls.com/Privacy'),
-                child: const Text(
-                  'Privacy Policy',
-                  style: TextStyle(
-                    color: AppColors.textMuted,
-                    fontSize: 11,
-                    decoration: TextDecoration.underline,
+                  GestureDetector(
+                    onTap: () => _launchURL(context, 'https://nanourls.com/Privacy'),
+                    child: const Text(
+                      'Privacy Policy',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
