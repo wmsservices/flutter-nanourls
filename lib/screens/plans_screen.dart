@@ -43,7 +43,7 @@ class _PlansScreenState extends State<PlansScreen> {
     try {
       // 1. Busca os planos da API interna
       final apiPlans = await _apiService.fetchActivePlans();
-      
+
       // Ordena por preço crescente
       apiPlans.sort((a, b) => a.price.compareTo(b.price));
 
@@ -79,7 +79,7 @@ class _PlansScreenState extends State<PlansScreen> {
 
     try {
       await Purchases.purchase(PurchaseParams.package(package));
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -396,6 +396,29 @@ class _PlansScreenState extends State<PlansScreen> {
     );
   }
 
+  // Abre links externos no navegador padrão do dispositivo
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        // Utiliza o externalApplication para forçar a abertura no Safari/Chrome,
+        // garantindo a correta exibição e validação pelos revisores.
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("${context.l10n('error')}: Não foi possível abrir o link."),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      // Falha silenciosa em caso de erro na abertura do link
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -413,80 +436,85 @@ class _PlansScreenState extends State<PlansScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : _errorMessage != null
-                    ? _buildErrorWidget()
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 16),
-                          Text(
-                            context.l10n('Plans_Header_Title'),
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              height: 1.2,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Padding(
+                ? _buildErrorWidget()
+                : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 16),
+                Text(
+                  context.l10n('Plans_Header_Title'),
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    height: 1.2,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Text(
+                    context.l10n('Plans_Header_Desc'),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textMuted,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                _buildBillingToggle(),
+
+                const SizedBox(height: 8),
+
+                // Links legais fixos no cabeçalho (visíveis sem necessidade de scroll)
+                _buildLegalLinks(),
+
+                const SizedBox(height: 16),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Itera sobre os planos da API que não são anuais para agrupamento
+                        ..._apiPlans.where((p) => !p.isAnnual).map((plan) {
+                          // Localiza o pacote mensal correspondente
+                          Package? monthlyPkg;
+                          for (var pkg in _rcPackages) {
+                            if (pkg.identifier == plan.package) {
+                              monthlyPkg = pkg;
+                              break;
+                            }
+                          }
+
+                          // Localiza o pacote anual correspondente
+                          Package? yearlyPkg;
+                          final yearlyPackageName = plan.package.replaceAll('_monthly', '_annual');
+                          for (var pkg in _rcPackages) {
+                            if (pkg.identifier == yearlyPackageName) {
+                              yearlyPkg = pkg;
+                              break;
+                            }
+                          }
+
+                          return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            child: Text(
-                              context.l10n('Plans_Header_Desc'),
-                              style: const TextStyle(
-                                fontSize: 15,
-                                color: AppColors.textMuted,
-                                height: 1.4,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
+                            child: _buildPlanCard(plan, monthlyPkg, yearlyPkg),
+                          );
+                        }),
 
-                          _buildBillingToggle(),
-
-                          const SizedBox(height: 16),
-
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.only(bottom: 24.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  // Loop sob os planos da API que não são anuais para agrupamento
-                                  ..._apiPlans.where((p) => !p.isAnnual).map((plan) {
-                                    // Localiza o package mensal correspondente
-                                    Package? monthlyPkg;
-                                    for (var pkg in _rcPackages) {
-                                      if (pkg.identifier == plan.package) {
-                                        monthlyPkg = pkg;
-                                        break;
-                                      }
-                                    }
-
-                                    // Localiza o package anual correspondente
-                                    Package? yearlyPkg;
-                                    final yearlyPackageName = plan.package.replaceAll('_monthly', '_annual');
-                                    for (var pkg in _rcPackages) {
-                                      if (pkg.identifier == yearlyPackageName) {
-                                        yearlyPkg = pkg;
-                                        break;
-                                      }
-                                    }
-
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                                      child: _buildPlanCard(plan, monthlyPkg, yearlyPkg),
-                                    );
-                                  }),
-
-                                  Center(child: _buildFooterSupport()),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        Center(child: _buildFooterSupport()),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           if (_isSubmitting)
             Container(
@@ -502,7 +530,7 @@ class _PlansScreenState extends State<PlansScreen> {
 
   Widget _buildBillingToggle() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 24.0),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
@@ -588,6 +616,41 @@ class _PlansScreenState extends State<PlansScreen> {
     );
   }
 
+  // Componente isolado para os links legais (Termos e Privacidade)
+  Widget _buildLegalLinks() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () => _launchURL('https://nanourls.com/Terms'),
+          child: const Text(
+            'Terms of Use (EULA)',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 12,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: Text('|', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+        ),
+        GestureDetector(
+          onTap: () => _launchURL('https://nanourls.com/Privacy'),
+          child: const Text(
+            'Privacy Policy',
+            style: TextStyle(
+              color: AppColors.textMuted,
+              fontSize: 12,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildErrorWidget() {
     return Center(
       child: Padding(
@@ -617,7 +680,7 @@ class _PlansScreenState extends State<PlansScreen> {
     final isYearlySelected = _billingCycle == 'yearly';
     final activePkg = isYearlySelected ? yearlyPkg : monthlyPkg;
 
-    // Preço formatado (prioriza o do RevenueCat, senão usa R$0.00)
+    // Preço formatado (prioriza o do RevenueCat, senão utiliza valor padrão)
     final priceStr = activePkg?.storeProduct.priceString ?? "\$0.00";
 
     // Busca o plano correspondente ao yearlyPkg
@@ -631,12 +694,12 @@ class _PlansScreenState extends State<PlansScreen> {
       }
     }
 
-    // Valida se este plano representa a assinatura ativa do usuário
+    // Valida se o plano em exibição corresponde à assinatura ativa do usuário
     final user = _sessionManager.currentUser;
-    final isCurrentPlan = user != null && 
+    final isCurrentPlan = user != null &&
         (user.planId == plan.planId || (yearlyPlan != null && user.planId == yearlyPlan.planId));
 
-    // Determina o texto do botão
+    // Determina o texto de ação do botão
     String btnText = context.l10n('Plans_Btn_SubscribePro');
     if (isCurrentPlan) {
       btnText = context.l10n('Plans_Btn_Current');
@@ -646,16 +709,16 @@ class _PlansScreenState extends State<PlansScreen> {
       btnText = context.l10n('Plans_Btn_BeMax');
     }
 
-    // Tradução das features utilizando as chaves localizadas
-    final linksStr = plan.linksPerMonth == -1 
-        ? context.l10n('Plans_Feat_Links_Unlimited') 
+    // Formatação dos recursos através das chaves de tradução
+    final linksStr = plan.linksPerMonth == -1
+        ? context.l10n('Plans_Feat_Links_Unlimited')
         : context.l10n('Plans_Feat_Links_Format', args: [plan.linksPerMonth]);
-    
-    final analyticsStr = plan.maxAnalytics == -1 
-        ? context.l10n('Plans_Feat_Analytics_Unlimited') 
+
+    final analyticsStr = plan.maxAnalytics == -1
+        ? context.l10n('Plans_Feat_Analytics_Unlimited')
         : context.l10n('Plans_Feat_Analytics_Format', args: [plan.maxAnalytics]);
 
-    // Descrição localizada do plano
+    // Definição da descrição com base no tipo de plano
     String planDesc = '';
     if (plan.package == 'free') {
       planDesc = context.l10n('Plans_Desc_1');
@@ -677,12 +740,12 @@ class _PlansScreenState extends State<PlansScreen> {
         ),
         boxShadow: isCurrentPlan
             ? [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  spreadRadius: 2,
-                )
-              ]
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            blurRadius: 30,
+            spreadRadius: 2,
+          )
+        ]
             : null,
       ),
       child: Padding(
@@ -751,8 +814,8 @@ class _PlansScreenState extends State<PlansScreen> {
               ],
             ),
             const SizedBox(height: 28),
-            
-            // Lista de Features Positivas (apenas se verdadeiro na entidade)
+
+            // Renderização dos recursos (features) de acordo com o plano selecionado
             _buildFeatureRow(linksStr),
             _buildFeatureRow(analyticsStr),
             if (plan.hasDetailedAnalytics) _buildFeatureRow(context.l10n('Plans_Feat_DetailedAnalytics')),
@@ -767,12 +830,12 @@ class _PlansScreenState extends State<PlansScreen> {
                 onPressed: isCurrentPlan
                     ? null
                     : () {
-                        if (plan.package == 'free') {
-                          _confirmChangePlanApi(plan);
-                        } else if (activePkg != null) {
-                          _confirmPurchase(activePkg, plan.name);
-                        }
-                      },
+                  if (plan.package == 'free') {
+                    _confirmChangePlanApi(plan);
+                  } else if (activePkg != null) {
+                    _confirmPurchase(activePkg, plan.name);
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isCurrentPlan ? Colors.white10 : AppColors.primary,
                   foregroundColor: isCurrentPlan ? Colors.white30 : AppColors.textLight,
