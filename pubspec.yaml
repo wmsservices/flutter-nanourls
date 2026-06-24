@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ^3.11.5
@@ -17,9 +17,9 @@ dependencies:
   app_tracking_transparency: ^2.0.4
   cupertino_icons: ^1.0.8
   device_info_plus: ^13.1.0
-  firebase_analytics: ^12.4.2
-  firebase_core: ^4.10.0
-  firebase_messaging: ^16.3.0
+  firebase_analytics: ^12.4.3
+  firebase_core: ^4.11.0
+  firebase_messaging: ^16.4.1
   flutter_svg: ^2.0.9
   font_awesome_flutter: ^11.0.0
   google_mobile_ads: ^9.0.0
@@ -27,7 +27,7 @@ dependencies:
   package_info_plus: ^10.1.0
   path_provider: ^2.1.5
   pointycastle: ^4.0.0
-  purchases_flutter: ^10.2.3
+  purchases_flutter: ^10.3.0
   share_plus: ^13.1.0
   shared_preferences: ^2.2.0
   url_launcher: ^6.3.2

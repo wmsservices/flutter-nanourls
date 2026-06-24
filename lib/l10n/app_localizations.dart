@@ -27,6 +27,12 @@ class AppLocalizations {
       'network_error': 'Network error. Please try again.',
       'no_internet': 'No internet connection. Check your connection.',
 
+      // Menu
+      'menu_refresh': 'Refresh',
+      'menu_account': 'My Account',
+      'menu_logout': 'Log Out',
+      'menu_info': 'Information',
+
       // Splash Screen
       'auto_login_failed': 'Automatic login failed. Please sign in.',
       'splash_tagline': 'Shorten your links with style',
@@ -41,7 +47,6 @@ class AppLocalizations {
       'onboarding_desc_2': 'Search and sort your links instantly',
       'onboarding_title_3': 'Share',
       'onboarding_desc_3': 'Generate QR codes and share anywhere',
-
 
       // Login Screen
       'login_header_title': 'Shorten your\nURLs with\n',
@@ -395,6 +400,12 @@ class AppLocalizations {
       'network_error': 'Erro no servidor. Tente novamente.',
       'no_internet': 'Sem conexão com a internet. Verifique suas conexões.',
 
+      // Menu
+      'menu_refresh': 'Recarregar',
+      'menu_account': 'Minha Conta',
+      'menu_logout': 'Sair',
+      'menu_info': 'Informações',
+
       // Splash Screen
       'auto_login_failed': 'Falha no login automático. Por favor, identifique-se.',
       'splash_tagline': 'Encurte seus links com estilo',
@@ -409,7 +420,6 @@ class AppLocalizations {
       'onboarding_desc_2': 'Busque e filtre seus links instantaneamente',
       'onboarding_title_3': 'Compartilhar',
       'onboarding_desc_3': 'Gere códigos QR e compartilhe em um toque',
-
 
       // Login Screen
       'login_header_title': 'Encurte suas\nURLs com\n',
@@ -703,7 +713,7 @@ class AppLocalizations {
       'qr_share_text': 'QR Code para a NanoUrl: {0}',
       'qr_code_download_failed': 'Falha ao baixar imagem do QR Code.',
       'qr_share_error': 'Erro ao compartilhar QR Code: {0}',
-      'share': 'Compartilhar',
+      'share': 'Compartir',
       'cannot_open_link': 'Não foi possível abrir o link: {0}',
       'share_sheet_title': 'Escolha o link para compartilhar',
       'status_trash': 'LIXEIRA',
@@ -763,6 +773,12 @@ class AppLocalizations {
       'network_error': 'Error del servidor. Inténtelo de nuevo.',
       'no_internet': 'Sin conexión a internet. Verifique sus conexiones.',
 
+      // Menu
+      'menu_refresh': 'Recargar',
+      'menu_account': 'Mi Cuenta',
+      'menu_logout': 'Cerrar Sesión',
+      'menu_info': 'Información',
+
       // Splash Screen
       'auto_login_failed': 'Error en el inicio de sesión automático. Por favor, identifíquese.',
       'splash_tagline': 'Acorta tus enlaces con estilo',
@@ -777,7 +793,6 @@ class AppLocalizations {
       'onboarding_desc_2': 'Busca y filtra tus enlaces al instante',
       'onboarding_title_3': 'Compartir',
       'onboarding_desc_3': 'Genera códigos QR y comparte donde quieras',
-
 
       // Login Screen
       'login_header_title': 'Acorte sus\nURLs con\n',
@@ -1131,6 +1146,12 @@ class AppLocalizations {
       'network_error': 'Erreur du serveur. Veuillez réessayer.',
       'no_internet': 'Pas de connexion Internet. Vérifiez vos connexions.',
 
+      // Menu
+      'menu_refresh': 'Actualiser',
+      'menu_account': 'Mon Compte',
+      'menu_logout': 'Se Déconnecter',
+      'menu_info': 'Informations',
+
       // Splash Screen
       'auto_login_failed': 'Échec de la connexion automatique. Veuillez vous connecter.',
       'splash_tagline': 'Raccourcissez vos liens avec style',
@@ -1141,11 +1162,10 @@ class AppLocalizations {
       'onboarding_start': 'Commencer',
       'onboarding_title_1': 'Raccourcir',
       'onboarding_desc_1': 'Transformez vos liens longs en NanoUrls élégantes',
-      'onboarding_title_2': 'Organiser',
+      'onboarding_title_2': 'Organizar',
       'onboarding_desc_2': 'Recherchez et filtrez vos liens instantanément',
       'onboarding_title_3': 'Partager',
       'onboarding_desc_3': 'Générez des codes QR et partagez facilement',
-
 
       // Login Screen
       'login_header_title': 'Raccourcissez vos\nURLs avec\n',
@@ -1206,7 +1226,7 @@ class AppLocalizations {
 
       // Home Screen
       'account_disabled_warning': 'Veuillez confirmer votre e-mail pour activer votre compte et débloquer toutes les fonctionnalités. Appuyez sur Actualiser après confirmation.',
-      'update_btn': 'Actualiser',
+      'update_btn': 'Actualizar',
       'dashboard_title': 'Mes ',
       'trash_title': 'Mode ',
       'trash_title_highlight': 'Corbeille',

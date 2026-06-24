@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 import '../services/admob_controller.dart';
 
 class AboutNanoUrlsDialog extends StatelessWidget {
   const AboutNanoUrlsDialog({super.key});
+
+  Future<void> _launchURL(BuildContext context, String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("${context.l10n('error')}: Não foi possível abrir o link."),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +45,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
             onTap: () {
               AdmobController.instance.incrementEasterEggTaps(
                 context,
-                () {
+                    () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(context.l10n('ads_disabled_session')),
@@ -57,7 +76,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18.0),
-          
+
           // App Title with styling
           Text.rich(
             TextSpan(
@@ -69,7 +88,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
                 color: Colors.white,
               ),
               children: [
-                TextSpan(
+                const TextSpan(
                   text: 'NanoUrls',
                   style: TextStyle(
                     color: AppColors.primary,
@@ -79,12 +98,12 @@ class AboutNanoUrlsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4.0),
-          
+
           // Version Number
           FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
             builder: (context, snapshot) {
-              final versionStr = snapshot.hasData 
+              final versionStr = snapshot.hasData
                   ? context.l10n('about_dialog_version', args: [snapshot.data!.version])
                   : '...';
               return Container(
@@ -107,7 +126,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
             },
           ),
           const SizedBox(height: 20.0),
-          
+
           // Description
           Text(
             context.l10n('about_dialog_desc'),
@@ -130,7 +149,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
           _buildDetailRow(Icons.analytics_outlined, context.l10n('about_feature_analytics')),
 
           const SizedBox(height: 24.0),
-          
+
           // Close button
           SizedBox(
             width: double.infinity,
@@ -149,7 +168,7 @@ class AboutNanoUrlsDialog extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12.0),
-          
+
           // Footer
           Text(
             context.l10n('about_dialog_copyright'),
@@ -158,6 +177,40 @@ class AboutNanoUrlsDialog extends StatelessWidget {
               color: Colors.white38,
               fontSize: 11.0,
             ),
+          ),
+          const SizedBox(height: 12.0),
+
+          // --- Apple Guideline Links ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () => _launchURL(context, 'https://nanourls.com/Terms'),
+                child: const Text(
+                  'Terms of Use (EULA)',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text('|', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+              ),
+              GestureDetector(
+                onTap: () => _launchURL(context, 'https://nanourls.com/Privacy'),
+                child: const Text(
+                  'Privacy Policy',
+                  style: TextStyle(
+                    color: AppColors.textMuted,
+                    fontSize: 11,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -133,8 +133,6 @@ class _HomeScreenState extends State<HomeScreen> {
   // Calculate trash count dynamically
   int get _trashCount => _urls.where((u) => !u.enabled).length;
 
-
-
   bool _checkUserEnabled() {
     final user = _sessionManager.currentUser;
     if (user != null && !user.enabled) {
@@ -181,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final stats = await _apiService.fetchUrlAnalytics(shortCode, days: 7);
-      
+
       // Dismiss the loading dialog
       navigator.pop();
 
@@ -239,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       // Dismiss the loading dialog
       navigator.pop();
-      
+
       if (!mounted) return;
       scaffoldMessenger.showSnackBar(
         SnackBar(
@@ -354,7 +352,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } else {
       // 2. Permanent Delete from Trash (requires confirmation)
-      // Utilizando o nosso componente modularizado agora!
       final confirmed = await showDialog<dynamic>(
         context: context,
         builder: (context) => ConfirmActionDialog(
@@ -552,33 +549,85 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          // Account Button
-          if (_sessionManager.isAuthenticated)
-            IconButton(
-              icon: const Icon(Icons.manage_accounts, color: AppColors.primary),
-              tooltip: context.l10n('account_settings_title'),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/account');
-              },
+          // Menu Hambúrguer unificado (Dropdown)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.menu, color: AppColors.primary),
+            color: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.border),
             ),
-          // Refresh Button
-          if (_sessionManager.isAuthenticated)
-            IconButton(
-              icon: const Icon(Icons.refresh, color: AppColors.primary),
-              tooltip: context.l10n('refresh_tooltip'),
-              onPressed: _loadDashboardData,
-            ),
-          // Logout button styled matching card mode & refresh
-          IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.primary),
-            tooltip: context.l10n('logout_tooltip'),
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              await _apiService.logout();
-              _sessionManager.clearSession();
-              navigator.pushReplacementNamed('/login');
+            offset: const Offset(0, 50),
+            onSelected: (value) async {
+              switch (value) {
+                case 'refresh':
+                  _loadDashboardData();
+                  break;
+                case 'account':
+                  Navigator.of(context).pushNamed('/account');
+                  break;
+                case 'logout':
+                  final navigator = Navigator.of(context);
+                  await _apiService.logout();
+                  _sessionManager.clearSession();
+                  navigator.pushReplacementNamed('/login');
+                  break;
+                case 'info':
+                  showDialog(
+                    context: context,
+                    builder: (context) => const AboutNanoUrlsDialog(),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return [
+                if (_sessionManager.isAuthenticated)
+                  PopupMenuItem<String>(
+                    value: 'refresh',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.refresh, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Text(context.l10n('menu_refresh'), style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                if (_sessionManager.isAuthenticated)
+                  PopupMenuItem<String>(
+                    value: 'account',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.manage_accounts, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Text(context.l10n('menu_account'), style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.logout, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Text(context.l10n('menu_logout'), style: const TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'info',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                      const SizedBox(width: 12),
+                      Text(context.l10n('menu_info'), style: const TextStyle(color: Colors.white)),
+                    ],
+                  ),
+                ),
+              ];
             },
           ),
+          const SizedBox(width: 8), // Padding para não ficar colado na borda
         ],
       ),
       body: Column(
