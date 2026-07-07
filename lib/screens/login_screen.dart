@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 // Login screen to authenticate users with backend API signin integrations
 class LoginScreen extends StatefulWidget {
@@ -154,8 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 24.0),
                     RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
+                      text: TextSpan(
+                        style: const TextStyle(
                           fontFamily: 'SplineSans',
                           fontSize: 36.0,
                           height: 1.15,
@@ -163,7 +164,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white,
                         ),
                         children: [
-                          TextSpan(text: 'Encurte suas\nURLs com\n'),
+                          TextSpan(text: context.l10n('login_header_title')),
                           TextSpan(
                             text: 'NanoUrls',
                             style: TextStyle(
@@ -180,10 +181,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16.0),
-                    const Text(
-                      'A maneira mais simples, rápida e segura de gerenciar seus links. '
-                      'Transforme URLs longas em links curtos e poderosos.',
-                      style: TextStyle(
+                    Text(
+                      context.l10n('login_header_desc'),
+                      style: const TextStyle(
                         fontFamily: 'SplineSans',
                         fontSize: 14.0,
                         height: 1.5,
@@ -201,9 +201,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Endereço de E-mail',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('email_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -214,22 +214,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         style: const TextStyle(color: Colors.white),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.email_outlined),
-                          hintText: 'exemplo@email.com',
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          hintText: context.l10n('email_hint'),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Por favor, insira seu e-mail.';
+                            return context.l10n('email_validation_empty');
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 20.0),
                       
-                      const Text(
-                        'Senha de Acesso',
-                        style: TextStyle(
+                      Text(
+                        context.l10n('password_label'),
+                        style: const TextStyle(
                           fontSize: 14.0,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -242,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.lock_outline),
-                          hintText: 'Digite sua senha',
+                          hintText: context.l10n('password_hint'),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -256,7 +256,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Por favor, insira sua senha.';
+                            return context.l10n('password_validation_empty');
                           }
                           return null;
                         },
@@ -290,9 +290,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                     _rememberMe = !_rememberMe;
                                   });
                                 },
-                                child: const Text(
-                                  'Lembrar credenciais',
-                                  style: TextStyle(
+                                child: Text(
+                                  context.l10n('remember_credentials'),
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14.0,
                                     fontFamily: 'SplineSans',
@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primary,
                             ),
-                            child: const Text('Esqueceu a senha?'),
+                            child: Text(context.l10n('forgot_password')),
                           ),
                         ],
                       ),
@@ -320,9 +320,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withOpacity(0.1),
+                            color: Colors.redAccent.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.0),
-                            border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
+                            border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
                           ),
                           child: Row(
                             children: [
@@ -357,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     strokeWidth: 2.5,
                                   ),
                                 )
-                              : const Text('Entrar'),
+                              : Text(context.l10n('sign_in_btn')),
                         ),
                       ),
                       const SizedBox(height: 24.0),
@@ -372,17 +372,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             foregroundColor: Colors.white70,
                           ),
                           child: RichText(
-                            text: const TextSpan(
-                              text: 'Não tem conta? ',
-                              style: TextStyle(
+                            text: TextSpan(
+                              text: '${context.l10n('dont_have_account')} ',
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontFamily: 'SplineSans',
                                 fontSize: 14.0,
                               ),
                               children: [
                                 TextSpan(
-                                  text: 'Cadastre-se.',
-                                  style: TextStyle(
+                                  text: context.l10n('register_now'),
+                                  style: const TextStyle(
                                     color: AppColors.primary,
                                     fontWeight: FontWeight.bold,
                                   ),

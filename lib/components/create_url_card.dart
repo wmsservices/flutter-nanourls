@@ -100,7 +100,7 @@ class _CreateUrlCardState extends State<CreateUrlCard> {
         border: Border.all(color: AppColors.border, width: 1.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: Colors.black.withValues(alpha: 0.5),
             blurRadius: 25,
             offset: const Offset(0, 10),
           ),
@@ -153,7 +153,7 @@ class _CreateUrlCardState extends State<CreateUrlCard> {
                 onPressed: _isLoading ? null : _submit,
                 style: ElevatedButton.styleFrom(
                   elevation: _isLoading ? 0 : 8,
-                  shadowColor: AppColors.primary.withOpacity(0.4),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.4),
                 ),
                 child: _isLoading
                     ? const SizedBox(
@@ -181,9 +181,9 @@ class _CreateUrlCardState extends State<CreateUrlCard> {
               Container(
                 padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.1),
+                  color: Colors.redAccent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12.0),
-                  border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
+                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.2)),
                 ),
                 child: Row(
                   children: [
@@ -206,9 +206,9 @@ class _CreateUrlCardState extends State<CreateUrlCard> {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12.0),
-                  border: Border.all(color: Colors.green.withOpacity(0.2)),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

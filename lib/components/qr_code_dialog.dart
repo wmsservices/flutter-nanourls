@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../entities/nano_url.dart';
 import '../theme/app_theme.dart';
+import '../l10n/app_localizations.dart';
 
 class QrCodeDialog extends StatefulWidget {
   final NanoUrl url;
@@ -21,10 +22,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
 
   void _copyToClipboard(BuildContext context) {
     final messenger = ScaffoldMessenger.of(context);
+    final l10nMessage = context.l10n('link_copied', args: [widget.url.goLink]);
     Clipboard.setData(ClipboardData(text: widget.url.goLink)).then((_) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Link copiado: ${widget.url.goLink}'),
+          content: Text(l10nMessage),
           backgroundColor: AppColors.primary,
           duration: const Duration(seconds: 1),
         ),
@@ -33,6 +35,11 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
   }
 
   Future<void> _shareQrCode() async {
+    final l10nShareText = context.l10n('qr_share_text', args: [widget.url.shortUrl]);
+    final l10nDownloadFailed = context.l10n('qr_code_download_failed');
+    final box = context.findRenderObject() as RenderBox?;
+    final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+
     setState(() {
       _isSharing = true;
     });
@@ -48,24 +55,23 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
         final file = await File('${tempDir.path}/qrcode_${widget.url.shortUrl}.png').create();
         await file.writeAsBytes(response.bodyBytes);
 
-        final box = context.findRenderObject() as RenderBox?;
-        final rect = box != null ? (box.localToGlobal(Offset.zero) & box.size) : null;
+        if (!mounted) return;
 
         await SharePlus.instance.share(
           ShareParams(
-            text: 'QR Code para a NanoUrl: ${widget.url.shortUrl}',
+            text: l10nShareText,
             files: [XFile(file.path)],
             sharePositionOrigin: rect,
           ),
         );
       } else {
-        throw 'Falha ao baixar imagem do QR Code.';
+        throw l10nDownloadFailed;
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao compartilhar QR Code: $e'),
+          content: Text(context.l10n('qr_share_error', args: [e])),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -99,9 +105,9 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Title
-            const Text(
-              'Código QR',
-              style: TextStyle(
+            Text(
+              context.l10n('qr_code_dialog_title'),
+              style: const TextStyle(
                 fontSize: 18.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -117,7 +123,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 borderRadius: BorderRadius.circular(16.0),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -190,6 +196,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.textLight,
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -213,7 +220,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                             size: 18,
                           ),
                           const SizedBox(width: 8),
-                          const Text('Compartilhar'),
+                          Text(context.l10n('share')),
                         ],
                       ),
               ),
@@ -229,13 +236,14 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
                 style: TextButton.styleFrom(
                   backgroundColor: Colors.transparent,
                   side: const BorderSide(color: AppColors.border, width: 1.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
-                child: const Text(
-                  'Fechar',
-                  style: TextStyle(
+                child: Text(
+                  context.l10n('close'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),

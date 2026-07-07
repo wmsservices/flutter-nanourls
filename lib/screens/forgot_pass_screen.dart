@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../components/email_field_component.dart';
+import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
@@ -56,19 +57,24 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
         context: context,
         barrierDismissible: false,
         builder: (context) {
+          final successMsg = context.l10n('forgot_pass_success_message', args: ['{EMAIL}']);
+          final msgParts = successMsg.split('{EMAIL}');
+          final msgBefore = msgParts.isNotEmpty ? msgParts[0] : '';
+          final msgAfter = msgParts.length > 1 ? msgParts[1] : '';
+
           return AlertDialog(
             backgroundColor: AppColors.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16.0),
               side: const BorderSide(color: AppColors.border),
             ),
-            title: const Row(
+            title: Row(
               children: [
-                Icon(Icons.check_circle_outline, color: AppColors.primary, size: 28),
-                SizedBox(width: 8),
+                const Icon(Icons.check_circle_outline, color: AppColors.primary, size: 28),
+                const SizedBox(width: 8),
                 Text(
-                  'E-mail Enviado!',
-                  style: TextStyle(
+                  context.l10n('forgot_pass_success_title'),
+                  style: const TextStyle(
                     fontFamily: 'SplineSans',
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -86,12 +92,12 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                   height: 1.5,
                 ),
                 children: [
-                  const TextSpan(text: 'Instruções para recuperar sua senha foram enviadas com sucesso para '),
+                  TextSpan(text: msgBefore),
                   TextSpan(
                     text: email,
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
-                  const TextSpan(text: '. Caso não encontre na caixa de entrada, verifique na pasta de Lixo Eletrônico ou Spam.'),
+                  TextSpan(text: msgAfter),
                 ],
               ),
             ),
@@ -153,8 +159,8 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                 const SizedBox(height: 24.0),
                 // Title
                 RichText(
-                  text: const TextSpan(
-                    style: TextStyle(
+                  text: TextSpan(
+                    style: const TextStyle(
                       fontFamily: 'SplineSans',
                       fontSize: 36.0,
                       height: 1.15,
@@ -162,8 +168,8 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                       color: Colors.white,
                     ),
                     children: [
-                      TextSpan(text: 'Recupere sua\nsenha na\n'),
-                      TextSpan(
+                      TextSpan(text: context.l10n('forgot_pass_title')),
+                      const TextSpan(
                         text: 'NanoUrls',
                         style: TextStyle(
                           color: AppColors.primary,
@@ -180,9 +186,9 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                   ),
                 ),
                 const SizedBox(height: 12.0),
-                const Text(
-                  'Insira e confirme seu e-mail cadastrado para receber o link de alteração de senha.',
-                  style: TextStyle(
+                Text(
+                  context.l10n('forgot_pass_desc'),
+                  style: const TextStyle(
                     color: AppColors.textMutedGreenish,
                     fontSize: 16.0,
                     height: 1.4,
@@ -193,7 +199,7 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                 // E-mail Field
                 EmailFieldComponent(
                   controller: _emailController,
-                  label: 'Endereço de E-mail',
+                  label: context.l10n('email_label'),
                   enabled: !_isLoading,
                 ),
                 const SizedBox(height: 20.0),
@@ -201,15 +207,15 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                 // Confirm E-mail Field
                 EmailFieldComponent(
                   controller: _confirmEmailController,
-                  label: 'Confirmar E-mail',
+                  label: context.l10n('email_confirm_label'),
                   prefixIcon: Icons.mark_email_read_outlined,
                   enabled: !_isLoading,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Por favor, confirme seu e-mail.';
+                      return context.l10n('email_confirm_validation_empty');
                     }
                     if (value.trim() != _emailController.text.trim()) {
-                      return 'Os e-mails informados não coincidem.';
+                      return context.l10n('email_confirm_validation_match');
                     }
                     return null;
                   },
@@ -222,9 +228,9 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12.0),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.1),
+                      color: Colors.redAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.0),
-                      border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
+                      border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -250,7 +256,7 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                     onPressed: _isLoading ? null : _submitForgotPassword,
                     style: ElevatedButton.styleFrom(
                       elevation: _isLoading ? 0 : 8,
-                      shadowColor: AppColors.primary.withOpacity(0.4),
+                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(9999),
                       ),
@@ -264,12 +270,12 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(AppColors.textLight),
                             ),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.send, size: 18),
-                              SizedBox(width: 8),
-                              Text('Enviar Instruções'),
+                              const Icon(Icons.send, size: 18),
+                              const SizedBox(width: 8),
+                              Text(context.l10n('send_btn')),
                             ],
                           ),
                   ),
@@ -283,17 +289,17 @@ class _ForgotPassScreenState extends State<ForgotPassScreen> {
                         ? null
                         : () => Navigator.of(context).pop(),
                     child: RichText(
-                      text: const TextSpan(
-                        style: TextStyle(
+                      text: TextSpan(
+                        style: const TextStyle(
                           fontFamily: 'SplineSans',
                           fontSize: 14.0,
                           color: AppColors.textMuted,
                         ),
                         children: [
-                          TextSpan(text: 'Lembrou a senha? '),
+                          TextSpan(text: context.l10n('remembered_password_question')),
                           TextSpan(
-                            text: 'Entrar.',
-                            style: TextStyle(
+                            text: context.l10n('login_action_dot'),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),

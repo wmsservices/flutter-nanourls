@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "835559571144",
+    "project_id": "nanourls-384fa",
+    "storage_bucket": "nanourls-384fa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835559571144:android:b13ee474eba50b3fb76ffd",
+        "android_client_info": {
+          "package_name": "com.nanourls.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJan5skjpBu3cP3nQhcM8x5tZzud4vR-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835559571144:android:b665eabb83e3b393b76ffd",
+        "android_client_info": {
+          "package_name": "com.nanourls.app.nanourls"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJan5skjpBu3cP3nQhcM8x5tZzud4vR-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

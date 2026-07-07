@@ -1,0 +1,3 @@
+"NSUserTrackingUsageDescription" = "Autorisez le suivi pour recevoir des annonces pertinentes et nous aider à garder NanoUrls 100% gratuit.";
+"NSPhotoLibraryAddUsageDescription" = "Cette application a besoin de l'autorisation pour enregistrer l'image du code QR dans votre galerie de photos.";
+"NSPhotoLibraryUsageDescription" = "Cette application a besoin d'accéder à votre galerie pour enregistrer le code QR.";

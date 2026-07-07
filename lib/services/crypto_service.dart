@@ -25,4 +25,13 @@ class CryptoService {
   String decryptPassword(String encryptedPassword) {
     return CryptoHelper.decryptDeterministic(encryptedPassword, CryptoSettings.cryptoPassKey);
   }
+
+  String encryptDeviceId(String deviceId) {
+    return CryptoHelper.encryptDeterministic(deviceId, CryptoSettings.cryptoDeviceId);
+  }
+
+  String decryptDeviceId(String encryptedDeviceId) {
+    return CryptoHelper.decryptDeterministic(encryptedDeviceId, CryptoSettings.cryptoDeviceId);
+  }
+
 }
