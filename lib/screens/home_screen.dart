@@ -563,6 +563,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 case 'refresh':
                   _loadDashboardData();
                   break;
+                case 'my-analytics':
+                  Navigator.of(context).pushNamed('/my-analytics');
+                  break;
                 case 'account':
                   Navigator.of(context).pushNamed('/account');
                   break;
@@ -590,6 +593,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         const Icon(Icons.refresh, color: AppColors.primary, size: 20),
                         const SizedBox(width: 12),
                         Text(context.l10n('menu_refresh'), style: const TextStyle(color: Colors.white)),
+                      ],
+                    ),
+                  ),
+                if (_sessionManager.isAuthenticated)
+                  PopupMenuItem<String>(
+                    value: 'my-analytics',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.query_stats, color: AppColors.primary, size: 20),
+                        const SizedBox(width: 12),
+                        Text(context.l10n('menu_my_analytics'), style: const TextStyle(color: Colors.white)),
                       ],
                     ),
                   ),
@@ -729,10 +743,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(width: 10.0),
                               Expanded(
-                                child: _buildStatBadge(
-                                  icon: const Icon(Icons.bar_chart, color: AppColors.primary, size: 16),
-                                  count: '$_analyticsLeft',
-                                  tooltip: context.l10n('analytics_unlocked', args: [_analyticsLeft]),
+                                child: GestureDetector(
+                                  // Atalho para a Central de Analytics (comparação entre NanoUrls)
+                                  onTap: () => Navigator.of(context).pushNamed('/my-analytics'),
+                                  child: _buildStatBadge(
+                                    icon: const Icon(Icons.bar_chart, color: AppColors.primary, size: 16),
+                                    count: '$_analyticsLeft',
+                                    tooltip: context.l10n('analytics_unlocked', args: [_analyticsLeft]),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 10.0),

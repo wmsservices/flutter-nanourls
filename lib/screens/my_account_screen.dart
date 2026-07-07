@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nanourls/services/purchase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../entities/plan.dart';
 import '../l10n/app_localizations.dart';
@@ -339,6 +340,8 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
   Future<void> _deleteAccount() async {
     final user = _sessionManager.currentUser;
     if (user == null) return;
+
+    await _handleDeleteAccountFlow();
 
     final decryptedEmail = _getDecryptedEmail(user.email);
 
@@ -748,7 +751,7 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
                       width: double.infinity,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: _isDeletingAccount ? null : _deleteAccount,
+                        onPressed: _isDeletingAccount ? null : _handleDeleteAccountFlow,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.redAccent,
                           foregroundColor: Colors.white,
@@ -941,5 +944,67 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
       return list[month - 1];
     }
     return '';
+  }
+
+  Future<void> _handleDeleteAccountFlow() async {
+    // 1. Verifica se o usuário tem um plano pago ativo (usando seu SessionManager)
+    final user = _sessionManager.currentUser;
+    final isPremium = user != null && user.planId > 1; // Considerando que 1 é o plano Free
+
+    if (isPremium) {
+      // 2. Se for Premium, bloqueia e avisa que ele precisa cancelar na loja
+      final proceed = await _showSubscriptionWarningDialog();
+
+      // Se ele fechou o modal ou não confirmou, aborta a exclusão da conta
+      if (proceed != true) return;
+    }
+
+    // 3. Segue com o fluxo normal de deletar a conta (abre seu ConfirmActionDialog de exclusão, etc)
+    _deleteAccount();
+  }
+
+  // Modal amigável avisando sobre a cobrança
+  Future<bool?> _showSubscriptionWarningDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 28),
+            SizedBox(width: 8),
+            Text('Atenção à sua Assinatura!', style: TextStyle(color: Colors.white, fontSize: 18)),
+          ],
+        ),
+        content: const Text(
+          'Notamos que você possui uma assinatura ativa.\n\nExcluir sua conta do NanoUrls NÃO cancela as cobranças automáticas da loja. Por favor, cancele sua assinatura na App Store/Play Store antes de excluir sua conta de forma definitiva.',
+          style: TextStyle(color: AppColors.textMuted, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false), // Aborta a exclusão
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Mágica do RevenueCat: Abre a tela nativa de gerenciamento de assinaturas da Apple/Google
+              try {
+                await PurchaseService.showManageSubscriptions();
+              } catch (e) {
+                // Caso dê erro ao abrir a loja (ex: ambiente de simulador)
+              }
+              // Retorna true caso o usuário tenha cancelado e agora queira prosseguir com a exclusão
+              if (context.mounted) Navigator.pop(context, true);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Gerenciar Assinatura'),
+          ),
+        ],
+      ),
+     );
   }
 }

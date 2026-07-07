@@ -1,3 +1,6 @@
+import 'package:nanourls/helpers/crypto_helper.dart';
+import 'package:nanourls/helpers/string_helper.dart';
+import 'package:nanourls/services/crypto_service.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import '../entities/user.dart';
 import 'admob_controller.dart';
@@ -46,7 +49,7 @@ class SessionManager {
     _token = token;
     _currentUser = user;
     if (user.userId.isNotEmpty) {
-      _bindRevenueCatUser(user.userId);
+      _bindRevenueCatUser(user);
     }
 
     // If showAds is not set or user's plan changed, update default value and fetch details
@@ -76,9 +79,12 @@ class SessionManager {
     }
   }
 
-  void _bindRevenueCatUser(String userId) async {
+  void _bindRevenueCatUser(User user) async {
     try {
-      await Purchases.logIn(userId);
+      var maskedEmail = StringHelper.maskEmail(CryptoService().decryptEmail(user.email));
+      await Purchases.logIn(user.userId);
+      await Purchases.setDisplayName(user.userName);
+      await Purchases.setEmail(maskedEmail);
     } catch (_) {
       // Silently catch configuration or connection issues during development
     }

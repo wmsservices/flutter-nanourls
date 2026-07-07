@@ -9,6 +9,7 @@ import '../entities/nano_url.dart';
 import '../entities/plan.dart';
 import '../entities/device.dart';
 import '../dtos/dashboard_data_dto.dart';
+import '../dtos/my_analytics_dto.dart';
 import 'session_manager.dart';
 import 'crypto_service.dart';
 
@@ -177,6 +178,23 @@ class ApiService {
       final response = await http.get(url, headers: _buildHeaders(requiresAuth: true));
       final data = _handleResponse(response);
       return DashboardDataDto.fromJson(data);
+    } on SocketException {
+      throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
+    }
+  }
+
+  // Busca o dashboard comparativo (Analytics Hub) de todas as NanoUrls com analytics do usuário.
+  // Sem "codes" o backend seleciona as mais clicadas (até MyAnalyticsDto.maxComparisonUrls).
+  Future<MyAnalyticsDto> fetchMyAnalytics({int days = 7, List<String>? codes}) async {
+    var path = '$_baseUrl/v1/analytics/my-dashboard/$days';
+    if (codes != null && codes.isNotEmpty) {
+      path += '?codes=${Uri.encodeQueryComponent(codes.join(','))}';
+    }
+    final url = Uri.parse(path);
+    try {
+      final response = await http.get(url, headers: _buildHeaders(requiresAuth: true));
+      final data = _handleResponse(response);
+      return MyAnalyticsDto.fromJson(data);
     } on SocketException {
       throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
     }

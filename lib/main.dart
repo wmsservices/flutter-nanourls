@@ -11,6 +11,7 @@ import 'screens/splash_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/analytics_screen.dart';
+import 'screens/my_analytics_screen.dart';
 import 'screens/create_edit_url_screen.dart';
 import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
@@ -101,6 +102,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/home': (context) => const HomeScreen(),
         '/create-edit': (context) => const CreateEditUrlScreen(),
+        '/my-analytics': (context) => const MyAnalyticsScreen(),
         '/url-info': (context) => const UrlInfoScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/account': (context) => const MyAccountScreen(),
