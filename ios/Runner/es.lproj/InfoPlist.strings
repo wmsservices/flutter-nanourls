@@ -1,0 +1,3 @@
+"NSUserTrackingUsageDescription" = "Permite el rastreo para recibir anuncios de tu interés y ayudarnos a mantener NanoUrls 100% gratis.";
+"NSPhotoLibraryAddUsageDescription" = "Esta aplicación necesita permiso para guardar la imagen del código QR en tu galería de fotos.";
+"NSPhotoLibraryUsageDescription" = "Esta aplicación necesita acceso a tu galería para guardar el código QR.";
