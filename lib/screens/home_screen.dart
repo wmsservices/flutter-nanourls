@@ -8,6 +8,7 @@ import '../components/about_dialog.dart';
 import '../components/confirm_action.dart'; // Importação do componente modularizado
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
+import '../services/keycloak_auth_service.dart';
 import '../services/session_manager.dart';
 import '../services/admob_controller.dart';
 import '../components/banner_ad_widget.dart';
@@ -572,6 +573,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 case 'logout':
                   final navigator = Navigator.of(context);
                   await _apiService.logout();
+                  // Encerra também a sessão SSO no Keycloak, se existir
+                  // (para sessões legadas apenas limpa os tokens locais)
+                  await KeycloakAuthService().logout();
                   _sessionManager.clearSession();
                   navigator.pushReplacementNamed('/login');
                   break;

@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
+import '../services/keycloak_auth_service.dart';
 import '../services/admob_controller.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
@@ -90,12 +91,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       // Ignora se a plataforma não suportar ou se a requisição falhar
     }
 
+    // 4.5. Tenta restaurar a sessão SSO (Keycloak) com o refresh token do armazenamento seguro
+    try {
+      loginSuccess = await KeycloakAuthService().restoreSession();
+    } catch (_) {
+      // Sem sessão SSO válida: segue para o auto-login legado
+    }
+
     // 5. Processa a verificação de auto-login e leitura do SharedPreferences
     try {
       final prefs = await SharedPreferences.getInstance();
       hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
       final remember = prefs.getBool('remember_me') ?? false;
-      if (remember) {
+      if (!loginSuccess && remember) {
         final encryptedEmail = prefs.getString('saved_email');
         final encryptedPassword = prefs.getString('saved_password');
         if (encryptedEmail != null && encryptedPassword != null) {

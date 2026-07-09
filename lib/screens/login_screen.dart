@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
+import '../services/keycloak_auth_service.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
@@ -21,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final ApiService _apiService = ApiService();
   
   bool _isLoading = false;
+  bool _isSsoLoading = false;
   bool _obscurePassword = true;
   bool _rememberMe = false;
   String? _errorMessage;
@@ -77,6 +80,33 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (_) {
       // Decryption or retrieval failure
+    }
+  }
+
+  // Login único (SSO): abre a tela do Keycloak no navegador do sistema (PKCE)
+  Future<void> _loginWithSso() async {
+    setState(() {
+      _isSsoLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await KeycloakAuthService().login();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/home');
+    } on FlutterAppAuthUserCancelledException {
+      // Usuário fechou o navegador: não é um erro
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = context.l10n('login_sso_error');
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSsoLoading = false;
+        });
+      }
     }
   }
 
@@ -358,6 +388,60 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 )
                               : Text(context.l10n('sign_in_btn')),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Divisor entre o login tradicional e o SSO
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(color: AppColors.border)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(
+                              context.l10n('login_sso_divider').toUpperCase(),
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 11.0,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          const Expanded(child: Divider(color: AppColors.border)),
+                        ],
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Login único (SSO) via Keycloak
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: OutlinedButton.icon(
+                          onPressed: _isSsoLoading ? null : _loginWithSso,
+                          icon: _isSsoLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.key, color: AppColors.primary, size: 20),
+                          label: Text(
+                            context.l10n('login_sso_button'),
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24.0),

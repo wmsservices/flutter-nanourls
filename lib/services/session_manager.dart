@@ -43,6 +43,12 @@ class SessionManager {
     AdmobController.instance.onAdsStatusChanged();
   }
 
+  // Update only the bearer token (used by the Keycloak/SSO flow,
+  // including silent token refresh, keeping ApiService headers current)
+  void updateToken(String token) {
+    _token = token;
+  }
+
   // Save authentication details in memory and bind user to RevenueCat
   void saveSession(String token, User user) {
     final oldPlanId = _currentUser?.planId;

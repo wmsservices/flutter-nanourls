@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/api_service.dart';
+import '../services/keycloak_auth_service.dart';
 import '../theme/app_theme.dart';
 import '../l10n/app_localizations.dart';
 
@@ -23,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final ApiService _apiService = ApiService();
 
   bool _isLoading = false;
+  bool _isSsoLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   int _passwordScore = 0;
@@ -121,6 +124,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   // Handle registration form submission
+  // Cadastro instantâneo via SSO: a conta local é provisionada automaticamente
+  // pela API (Just-in-Time) no primeiro acesso autenticado
+  Future<void> _signUpWithSso() async {
+    setState(() {
+      _isSsoLoading = true;
+    });
+
+    try {
+      await KeycloakAuthService().login();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/home');
+    } on FlutterAppAuthUserCancelledException {
+      // Usuário fechou o navegador: não é um erro
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n('login_sso_error')),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSsoLoading = false;
+        });
+      }
+    }
+  }
+
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -658,6 +691,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                 )
                               : Text(context.l10n('sign_up_btn')),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      // Cadastro instantâneo via SSO (requer os mesmos aceites de Termos/Privacidade)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52,
+                        child: OutlinedButton.icon(
+                          onPressed: (_isSsoLoading || !_agreeTerms || !_agreePrivacy) ? null : _signUpWithSso,
+                          icon: _isSsoLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.primary,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Icon(Icons.key, color: AppColors.primary, size: 20),
+                          label: Text(
+                            context.l10n('signup_sso_button'),
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24.0),

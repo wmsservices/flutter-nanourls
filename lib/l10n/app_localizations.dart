@@ -239,6 +239,11 @@ class AppLocalizations {
       'device_tablet': 'Tablet',
       'device_bot': 'Bots',
       'device_unknown': 'Unknown',
+      // SSO (Keycloak)
+      'login_sso_divider': 'or',
+      'login_sso_button': 'Sign in with SSO',
+      'login_sso_error': 'Could not sign in with SSO. Please try again.',
+      'signup_sso_button': 'Sign up instantly with SSO',
 
       // My Account Screen
       'account_settings_title': 'My Account',
@@ -640,6 +645,11 @@ class AppLocalizations {
       'device_tablet': 'Tablet',
       'device_bot': 'Robôs',
       'device_unknown': 'Desconhecido',
+      // SSO (Keycloak)
+      'login_sso_divider': 'ou',
+      'login_sso_button': 'Entrar com SSO',
+      'login_sso_error': 'Não foi possível entrar com o SSO. Tente novamente.',
+      'signup_sso_button': 'Cadastre-se na hora com SSO',
 
       // My Account Screen
       'account_settings_title': 'Minha Conta',
@@ -1041,6 +1051,11 @@ class AppLocalizations {
       'device_tablet': 'Tablet',
       'device_bot': 'Bots',
       'device_unknown': 'Desconocido',
+      // SSO (Keycloak)
+      'login_sso_divider': 'o',
+      'login_sso_button': 'Iniciar sesión con SSO',
+      'login_sso_error': 'No se pudo iniciar sesión con SSO. Inténtalo de nuevo.',
+      'signup_sso_button': 'Regístrate al instante con SSO',
 
       // My Account Screen
       'account_settings_title': 'Mi Cuenta',
@@ -1442,6 +1457,11 @@ class AppLocalizations {
       'device_tablet': 'Tablette',
       'device_bot': 'Robots',
       'device_unknown': 'Inconnu',
+      // SSO (Keycloak)
+      'login_sso_divider': 'ou',
+      'login_sso_button': 'Se connecter avec SSO',
+      'login_sso_error': 'Impossible de se connecter avec le SSO. Veuillez réessayer.',
+      'signup_sso_button': 'Inscrivez-vous instantanément avec SSO',
 
       // My Account Screen
       'account_settings_title': 'Mon Compte',

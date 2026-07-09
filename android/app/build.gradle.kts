@@ -48,6 +48,10 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Scheme do redirect OAuth2 (flutter_appauth) — deve bater com o
+        // redirect URI cadastrado no client "nanourls-app" do Keycloak
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.nanourls.app"
     }
 
     buildTypes {
