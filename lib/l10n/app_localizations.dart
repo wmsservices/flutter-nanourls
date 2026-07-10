@@ -242,8 +242,13 @@ class AppLocalizations {
       'device_unknown': 'Unknown',
       // SSO (Keycloak)
       'login_sso_divider': 'or',
-      'login_sso_button': 'Sign in with SSO',
+      'login_sso_button_prefix': 'Continue with',
       'login_sso_error': 'Could not sign in with SSO. Please try again.',
+      'login_sso_consent_prefix': 'By continuing with this account, you agree to NanoUrls\'',
+      'login_sso_consent_privacy_link': 'Privacy Policy',
+      'login_sso_consent_and': 'and',
+      'login_sso_consent_terms_link': 'Terms of Service',
+      'login_sso_consent_suffix': '.',
       'signup_sso_button': 'Sign up instantly with SSO',
 
       // My Account Screen
@@ -653,8 +658,13 @@ class AppLocalizations {
       'device_unknown': 'Desconhecido',
       // SSO (Keycloak)
       'login_sso_divider': 'ou',
-      'login_sso_button': 'Entrar com SSO',
+      'login_sso_button_prefix': 'Continuar com',
       'login_sso_error': 'Não foi possível entrar com o SSO. Tente novamente.',
+      'login_sso_consent_prefix': 'Ao entrar com esta conta, você concorda com a',
+      'login_sso_consent_privacy_link': 'Política de Privacidade',
+      'login_sso_consent_and': 'e os',
+      'login_sso_consent_terms_link': 'Termos de Serviço',
+      'login_sso_consent_suffix': 'do NanoUrls.',
       'signup_sso_button': 'Cadastre-se na hora com SSO',
 
       // My Account Screen
@@ -1064,8 +1074,13 @@ class AppLocalizations {
       'device_unknown': 'Desconocido',
       // SSO (Keycloak)
       'login_sso_divider': 'o',
-      'login_sso_button': 'Iniciar sesión con SSO',
+      'login_sso_button_prefix': 'Continuar con',
       'login_sso_error': 'No se pudo iniciar sesión con SSO. Inténtalo de nuevo.',
+      'login_sso_consent_prefix': 'Al continuar con esta cuenta, aceptas la',
+      'login_sso_consent_privacy_link': 'Política de Privacidad',
+      'login_sso_consent_and': 'y los',
+      'login_sso_consent_terms_link': 'Términos de Servicio',
+      'login_sso_consent_suffix': 'de NanoUrls.',
       'signup_sso_button': 'Regístrate al instante con SSO',
 
       // My Account Screen
@@ -1475,8 +1490,13 @@ class AppLocalizations {
       'device_unknown': 'Inconnu',
       // SSO (Keycloak)
       'login_sso_divider': 'ou',
-      'login_sso_button': 'Se connecter avec SSO',
+      'login_sso_button_prefix': 'Continuer avec',
       'login_sso_error': 'Impossible de se connecter avec le SSO. Veuillez réessayer.',
+      'login_sso_consent_prefix': 'En continuant avec ce compte, vous acceptez la',
+      'login_sso_consent_privacy_link': 'Politique de confidentialité',
+      'login_sso_consent_and': 'et les',
+      'login_sso_consent_terms_link': 'Conditions d\'utilisation',
+      'login_sso_consent_suffix': 'de NanoUrls.',
       'signup_sso_button': 'Inscrivez-vous instantanément avec SSO',
 
       // My Account Screen

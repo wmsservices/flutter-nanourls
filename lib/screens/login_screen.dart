@@ -1,7 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../dtos/identity_provider_dto.dart';
+import '../helpers/identity_provider_icon_helper.dart';
 import '../services/api_service.dart';
 import '../services/crypto_service.dart';
 import '../services/keycloak_auth_service.dart';
@@ -23,15 +28,56 @@ class _LoginScreenState extends State<LoginScreen> {
   final ApiService _apiService = ApiService();
   
   bool _isLoading = false;
-  bool _isSsoLoading = false;
   bool _obscurePassword = true;
   bool _rememberMe = false;
   String? _errorMessage;
   bool _argsLoaded = false;
 
+  // Provedores de identidade (SSO social) ativos no Keycloak, carregados dinamicamente.
+  // _loadingProviderAlias identifica qual botão está em andamento (null = nenhum)
+  List<IdentityProviderDto> _providers = [];
+  String? _loadingProviderAlias;
+
+  late TapGestureRecognizer _ssoPrivacyTapRecognizer;
+  late TapGestureRecognizer _ssoTermsTapRecognizer;
+
   @override
   void initState() {
     super.initState();
+    _loadIdentityProviders();
+    _ssoPrivacyTapRecognizer = TapGestureRecognizer()
+      ..onTap = () => _launchUrl('https://go.nanourls.com/privacy');
+    _ssoTermsTapRecognizer = TapGestureRecognizer()
+      ..onTap = () => _launchUrl('https://go.nanourls.com/terms');
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    try {
+      final uri = Uri.parse(urlString);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${context.l10n('error')}: $urlString'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    }
+  }
+
+  // Busca os provedores sociais ativos na API. Falha de rede não deve impedir o
+  // login tradicional: nesse caso a lista simplesmente permanece vazia
+  Future<void> _loadIdentityProviders() async {
+    final providers = await _apiService.fetchIdentityProviders();
+    if (!mounted) return;
+    setState(() {
+      _providers = providers;
+    });
   }
 
   @override
@@ -57,6 +103,8 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _ssoPrivacyTapRecognizer.dispose();
+    _ssoTermsTapRecognizer.dispose();
     super.dispose();
   }
 
@@ -83,15 +131,16 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Login único (SSO): abre a tela do Keycloak no navegador do sistema (PKCE)
-  Future<void> _loginWithSso() async {
+  // Login social (SSO): abre a tela do Keycloak no navegador do sistema (PKCE),
+  // já direcionado ao provedor escolhido via kc_idp_hint
+  Future<void> _loginWithSso(String providerAlias) async {
     setState(() {
-      _isSsoLoading = true;
+      _loadingProviderAlias = providerAlias;
       _errorMessage = null;
     });
 
     try {
-      await KeycloakAuthService().login();
+      await KeycloakAuthService().login(idpHint: providerAlias);
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/home');
     } on FlutterAppAuthUserCancelledException {
@@ -104,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } finally {
       if (mounted) {
         setState(() {
-          _isSsoLoading = false;
+          _loadingProviderAlias = null;
         });
       }
     }
@@ -390,61 +439,110 @@ class _LoginScreenState extends State<LoginScreen> {
                               : Text(context.l10n('sign_in_btn')),
                         ),
                       ),
-                      const SizedBox(height: 16.0),
+                      if (_providers.isNotEmpty) ...[
+                        const SizedBox(height: 16.0),
 
-                      // Divisor entre o login tradicional e o SSO
-                      Row(
-                        children: [
-                          const Expanded(child: Divider(color: AppColors.border)),
+                        // Divisor entre o login tradicional e o SSO
+                        Row(
+                          children: [
+                            const Expanded(child: Divider(color: AppColors.border)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(
+                                context.l10n('login_sso_divider').toUpperCase(),
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11.0,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider(color: AppColors.border)),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+
+                        // Botões sociais montados dinamicamente a partir dos provedores
+                        // ativos no Keycloak (Google, Apple, etc.), sem nada hardcoded aqui
+                        for (final provider in _providers)
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                            child: Text(
-                              context.l10n('login_sso_divider').toUpperCase(),
-                              style: const TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 11.0,
-                                letterSpacing: 1.2,
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: OutlinedButton.icon(
+                                onPressed: _loadingProviderAlias == null
+                                    ? () => _loginWithSso(provider.alias)
+                                    : null,
+                                icon: _loadingProviderAlias == provider.alias
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primary,
+                                          strokeWidth: 2.5,
+                                        ),
+                                      )
+                                    : FaIcon(
+                                        IdentityProviderIconHelper.getFaIconData(provider.alias),
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
+                                label: Text(
+                                  '${context.l10n('login_sso_button_prefix')} ${provider.displayName}',
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                          const Expanded(child: Divider(color: AppColors.border)),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
+                        const SizedBox(height: 12.0),
 
-                      // Login único (SSO) via Keycloak
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: OutlinedButton.icon(
-                          onPressed: _isSsoLoading ? null : _loginWithSso,
-                          icon: _isSsoLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : const Icon(Icons.key, color: AppColors.primary, size: 20),
-                          label: Text(
-                            context.l10n('login_sso_button'),
+                        // Aviso legal exibido só quando há botões de SSO social na tela
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            text: context.l10n('login_sso_consent_prefix'),
                             style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
+                              color: Colors.white38,
+                              fontSize: 12.0,
+                              fontFamily: 'SplineSans',
                             ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(999),
-                            ),
+                            children: [
+                              TextSpan(
+                                text: ' ${context.l10n('login_sso_consent_privacy_link')} ',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: _ssoPrivacyTapRecognizer,
+                              ),
+                              TextSpan(text: context.l10n('login_sso_consent_and')),
+                              TextSpan(
+                                text: ' ${context.l10n('login_sso_consent_terms_link')} ',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: _ssoTermsTapRecognizer,
+                              ),
+                              TextSpan(text: context.l10n('login_sso_consent_suffix')),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 24.0),
+                        const SizedBox(height: 12.0),
+                      ] else ...[
+                        const SizedBox(height: 24.0),
+                      ],
 
                       // Register / SignUp transition link
                       Center(

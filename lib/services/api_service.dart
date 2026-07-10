@@ -10,6 +10,7 @@ import '../entities/plan.dart';
 import '../entities/device.dart';
 import '../dtos/dashboard_data_dto.dart';
 import '../dtos/my_analytics_dto.dart';
+import '../dtos/identity_provider_dto.dart';
 import 'session_manager.dart';
 import 'crypto_service.dart';
 
@@ -127,6 +128,20 @@ class ApiService {
     } catch (e) {
       if (e is HttpException) rethrow;
       throw HttpException('Falha na comunicação: $e');
+    }
+  }
+
+  // Busca os provedores de identidade (SSO social) ativos no Keycloak, para montar
+  // dinamicamente os botões sociais da tela de login. Indisponibilidade da API/Keycloak
+  // não deve travar o login tradicional, então qualquer falha vira lista vazia
+  Future<List<IdentityProviderDto>> fetchIdentityProviders() async {
+    final url = Uri.parse('$_baseUrl/v1/user/identity-providers');
+    try {
+      final response = await http.get(url, headers: _buildHeaders());
+      final List<dynamic> listJson = _handleResponse(response) ?? [];
+      return listJson.map((item) => IdentityProviderDto.fromJson(item)).toList();
+    } catch (_) {
+      return [];
     }
   }
 

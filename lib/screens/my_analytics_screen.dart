@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../dtos/my_analytics_dto.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
@@ -29,6 +30,17 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
   // Métricas detalhadas (geo, origens, dispositivos) são exclusivas dos planos Pro/Max
   bool get _isFreePlan => SessionManager().currentUser?.planId == 1;
 
+  // Seções retráteis: preferência salva no SharedPreferences, isolada por userId
+  // (o dono do aparelho pode ter mais de uma conta logada ao longo do tempo)
+  Set<String> _collapsedSections = {};
+
+  String get _collapsedSectionsPrefsKey {
+    final userId = SessionManager().currentUser?.userId ?? 'anonymous';
+    return 'my_analytics_collapsed_sections_$userId';
+  }
+
+  bool _isCollapsed(String sectionId) => _collapsedSections.contains(sectionId);
+
   // Paleta espelhada do gráfico comparativo do WebApp
   static const List<Color> _seriesPalette = [
     Color(0xFFB3E600),
@@ -52,7 +64,57 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCollapsedSections();
     _loadData();
+  }
+
+  Future<void> _loadCollapsedSections() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList(_collapsedSectionsPrefsKey) ?? [];
+      if (mounted) setState(() => _collapsedSections = saved.toSet());
+    } catch (_) {
+      // Preferences indisponíveis — segue com todas as seções abertas
+    }
+  }
+
+  Future<void> _toggleSection(String sectionId) async {
+    setState(() {
+      if (_collapsedSections.contains(sectionId)) {
+        _collapsedSections.remove(sectionId);
+      } else {
+        _collapsedSections.add(sectionId);
+      }
+    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_collapsedSectionsPrefsKey, _collapsedSections.toList());
+    } catch (_) {
+      // Preferences indisponíveis — mantém o estado só nesta sessão
+    }
+  }
+
+  // Cabeçalho padrão das seções retráteis: título (com ícone/extras) + chevron que gira
+  Widget _collapsibleSectionHeader({required String sectionId, required Widget titleRow}) {
+    final collapsed = _isCollapsed(sectionId);
+    return Row(
+      children: [
+        Expanded(child: titleRow),
+        const SizedBox(width: 4.0),
+        InkWell(
+          onTap: () => _toggleSection(sectionId),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: AnimatedRotation(
+              turns: collapsed ? 0.0 : 0.25,
+              duration: const Duration(milliseconds: 200),
+              child: const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _loadData() async {
@@ -251,65 +313,70 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.tune, color: AppColors.primary, size: 18),
-                const SizedBox(width: 8.0),
-                Expanded(
-                  child: Text(
-                    context.l10n('my_analytics_compare_urls'),
-                    style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+            _collapsibleSectionHeader(
+              sectionId: 'compare-urls',
+              titleRow: Row(
+                children: [
+                  const Icon(Icons.tune, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      context.l10n('my_analytics_compare_urls'),
+                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
                   ),
-                ),
-                Text(
-                  context.l10n('my_analytics_selected_of', args: [selected.length, maxSelectable]),
-                  style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12.0),
-            Wrap(
-              spacing: 6.0,
-              runSpacing: 6.0,
-              children: selected
-                  .map((option) => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(GlyphHelper.getIconData(option.glyph), color: AppColors.primary, size: 13),
-                            const SizedBox(width: 5.0),
-                            Text(
-                              option.shortCode,
-                              style: const TextStyle(color: AppColors.primary, fontSize: 12.0, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ))
-                  .toList(),
-            ),
-            const SizedBox(height: 14.0),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: _openUrlSelector,
-                icon: const Icon(Icons.edit, size: 16, color: AppColors.primary),
-                label: Text(
-                  context.l10n('my_analytics_edit_selection'),
-                  style: const TextStyle(color: AppColors.primary, fontSize: 13.0, fontWeight: FontWeight.bold),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                ),
+                  Text(
+                    context.l10n('my_analytics_selected_of', args: [selected.length, maxSelectable]),
+                    style: const TextStyle(fontSize: 11.0, color: AppColors.textMuted, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
+            if (!_isCollapsed('compare-urls')) ...[
+              const SizedBox(height: 12.0),
+              Wrap(
+                spacing: 6.0,
+                runSpacing: 6.0,
+                children: selected
+                    .map((option) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(GlyphHelper.getIconData(option.glyph), color: AppColors.primary, size: 13),
+                              const SizedBox(width: 5.0),
+                              Text(
+                                option.shortCode,
+                                style: const TextStyle(color: AppColors.primary, fontSize: 12.0, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ))
+                    .toList(),
+              ),
+              const SizedBox(height: 14.0),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _openUrlSelector,
+                  icon: const Icon(Icons.edit, size: 16, color: AppColors.primary),
+                  label: Text(
+                    context.l10n('my_analytics_edit_selection'),
+                    style: const TextStyle(color: AppColors.primary, fontSize: 13.0, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -324,18 +391,23 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.dashboard, color: AppColors.primary, size: 18),
-                const SizedBox(width: 8.0),
-                Text(
-                  context.l10n('my_analytics_overview'),
-                  style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ],
+            _collapsibleSectionHeader(
+              sectionId: 'overview',
+              titleRow: Row(
+                children: [
+                  const Icon(Icons.dashboard, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8.0),
+                  Text(
+                    context.l10n('my_analytics_overview'),
+                    style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16.0),
-            _buildKpiGrid(data),
+            if (!_isCollapsed('overview')) ...[
+              const SizedBox(height: 16.0),
+              _buildKpiGrid(data),
+            ],
           ],
         ),
       ),
@@ -461,70 +533,75 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n('my_analytics_comparison_chart'),
-              style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+            _collapsibleSectionHeader(
+              sectionId: 'clicks-comparison',
+              titleRow: Text(
+                context.l10n('my_analytics_comparison_chart'),
+                style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
             ),
-            const SizedBox(height: 12.0),
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceInner,
-                    borderRadius: BorderRadius.circular(8),
+            if (!_isCollapsed('clicks-comparison')) ...[
+              const SizedBox(height: 12.0),
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceInner,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(2.0),
+                    child: Row(
+                      children: [
+                        _buildPeriodToggleButton(context.l10n('period_7_days'), 7),
+                        _buildPeriodToggleButton(context.l10n('period_30_days'), 30),
+                        _buildPeriodToggleButton(context.l10n('period_year'), 365),
+                      ],
+                    ),
                   ),
-                  padding: const EdgeInsets.all(2.0),
-                  child: Row(
-                    children: [
-                      _buildPeriodToggleButton(context.l10n('period_7_days'), 7),
-                      _buildPeriodToggleButton(context.l10n('period_30_days'), 30),
-                      _buildPeriodToggleButton(context.l10n('period_year'), 365),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16.0),
-            // Legenda com as cores de cada NanoUrl
-            Wrap(
-              spacing: 12.0,
-              runSpacing: 6.0,
-              children: [
-                for (int i = 0; i < data.series.length; i++)
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: _seriesPalette[i % _seriesPalette.length],
-                          shape: BoxShape.circle,
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              // Legenda com as cores de cada NanoUrl
+              Wrap(
+                spacing: 12.0,
+                runSpacing: 6.0,
+                children: [
+                  for (int i = 0; i < data.series.length; i++)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: _seriesPalette[i % _seriesPalette.length],
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 5.0),
+                        Text(
+                          data.series[i].shortCode,
+                          style: const TextStyle(fontSize: 11.0, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16.0),
+              SizedBox(
+                height: 200,
+                width: double.infinity,
+                child: _isReloading
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                    : CustomPaint(
+                        painter: ComparisonChartPainter(
+                          series: data.series,
+                          labels: data.chartLabels,
+                          palette: _seriesPalette,
                         ),
                       ),
-                      const SizedBox(width: 5.0),
-                      Text(
-                        data.series[i].shortCode,
-                        style: const TextStyle(fontSize: 11.0, color: Colors.white70),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16.0),
-            SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: _isReloading
-                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                  : CustomPaint(
-                      painter: ComparisonChartPainter(
-                        series: data.series,
-                        labels: data.chartLabels,
-                        palette: _seriesPalette,
-                      ),
-                    ),
-            ),
+              ),
+            ],
           ],
         ),
       ),
@@ -571,58 +648,63 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                const Icon(Icons.leaderboard, color: AppColors.primary, size: 18),
-                const SizedBox(width: 8.0),
-                Expanded(
-                  child: Text(
-                    context.l10n('my_analytics_ranking'),
-                    style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-                // Seletor de tamanho do ranking (Top 1..20)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceInner,
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<int>(
-                      value: effectiveTop,
-                      dropdownColor: AppColors.surface,
-                      icon: const Icon(Icons.arrow_drop_down, color: AppColors.textMuted, size: 18),
-                      style: const TextStyle(fontSize: 12.0, color: Colors.white, fontFamily: 'SplineSans'),
-                      onChanged: (value) {
-                        if (value != null) setState(() => _topN = value);
-                      },
-                      items: [
-                        DropdownMenuItem<int>(
-                          value: 0,
-                          child: Text(context.l10n('my_analytics_all')),
-                        ),
-                        for (int i = 1; i <= maxTop; i++)
-                          DropdownMenuItem<int>(
-                            value: i,
-                            child: Text('Top $i'),
-                          ),
-                      ],
+            child: _collapsibleSectionHeader(
+              sectionId: 'ranking',
+              titleRow: Row(
+                children: [
+                  const Icon(Icons.leaderboard, color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Text(
+                      context.l10n('my_analytics_ranking'),
+                      style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
-                ),
-              ],
+                  // Seletor de tamanho do ranking (Top 1..20)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceInner,
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<int>(
+                        value: effectiveTop,
+                        dropdownColor: AppColors.surface,
+                        icon: const Icon(Icons.arrow_drop_down, color: AppColors.textMuted, size: 18),
+                        style: const TextStyle(fontSize: 12.0, color: Colors.white, fontFamily: 'SplineSans'),
+                        onChanged: (value) {
+                          if (value != null) setState(() => _topN = value);
+                        },
+                        items: [
+                          DropdownMenuItem<int>(
+                            value: 0,
+                            child: Text(context.l10n('my_analytics_all')),
+                          ),
+                          for (int i = 1; i <= maxTop; i++)
+                            DropdownMenuItem<int>(
+                              value: i,
+                              child: Text('Top $i'),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const Divider(color: AppColors.borderSubtle, height: 1.0),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: rows.length,
-            separatorBuilder: (context, idx) => const Divider(color: AppColors.borderSubtle, height: 1.0),
-            itemBuilder: (context, index) => _buildRankingRow(rows[index]),
-          ),
+          if (!_isCollapsed('ranking')) ...[
+            const Divider(color: AppColors.borderSubtle, height: 1.0),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: rows.length,
+              separatorBuilder: (context, idx) => const Divider(color: AppColors.borderSubtle, height: 1.0),
+              itemBuilder: (context, index) => _buildRankingRow(rows[index]),
+            ),
+          ],
         ],
       ),
     );
@@ -746,6 +828,7 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
   // ===== Top Países / Top Cidades / Origens / Dispositivos =====
   Widget _buildCountriesCard(MyAnalyticsDto data) {
     return _buildSectionCard(
+      sectionId: 'top-countries',
       title: context.l10n('top_countries'),
       child: _isFreePlan
           ? _buildLockedPlaceholder(context)
@@ -766,6 +849,7 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
 
   Widget _buildCitiesCard(MyAnalyticsDto data) {
     return _buildSectionCard(
+      sectionId: 'top-cities',
       title: context.l10n('top_cities'),
       child: _isFreePlan
           ? _buildLockedPlaceholder(context)
@@ -785,6 +869,7 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
 
   Widget _buildReferrersCard(MyAnalyticsDto data) {
     return _buildSectionCard(
+      sectionId: 'traffic-sources',
       title: context.l10n('top_referrers'),
       child: _isFreePlan
           ? _buildLockedPlaceholder(context)
@@ -828,6 +913,7 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
 
   Widget _buildDevicesCard(MyAnalyticsDto data) {
     return _buildSectionCard(
+      sectionId: 'devices',
       title: context.l10n('my_analytics_devices'),
       child: _isFreePlan
           ? _buildLockedPlaceholder(context)
@@ -886,19 +972,24 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
     );
   }
 
-  Widget _buildSectionCard({required String title, required Widget child}) {
+  Widget _buildSectionCard({required String sectionId, required String title, required Widget child}) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+            _collapsibleSectionHeader(
+              sectionId: sectionId,
+              titleRow: Text(
+                title,
+                style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
             ),
-            const SizedBox(height: 16.0),
-            child,
+            if (!_isCollapsed(sectionId)) ...[
+              const SizedBox(height: 16.0),
+              child,
+            ],
           ],
         ),
       ),

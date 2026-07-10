@@ -41,8 +41,11 @@ class KeycloakAuthService {
   Timer? _refreshTimer;
 
   // Abre a tela de login do Keycloak no navegador do sistema (Custom Tab / ASWebAuthenticationSession),
-  // executa o Authorization Code Flow com PKCE e hidrata a sessão do app
-  Future<User> login() async {
+  // executa o Authorization Code Flow com PKCE e hidrata a sessão do app.
+  // [idpHint] é o alias do provedor social (ex.: "google", "apple") obtido via
+  // ApiService.fetchIdentityProviders(); quando informado, pula a tela de seleção
+  // de provedor do Keycloak e vai direto para o provedor escolhido pelo usuário
+  Future<User> login({String? idpHint}) async {
     final AuthorizationTokenResponse response = await _appAuth
         .authorizeAndExchangeCode(
           AuthorizationTokenRequest(
@@ -55,6 +58,7 @@ class KeycloakAuthService {
             // interpretado erroneamente pelo AppAuth como cancelamento do usuário
             // (race condition conhecida da lib nativa).
             promptValues: const ['login'],
+            additionalParameters: idpHint == null ? null : {'kc_idp_hint': idpHint},
           ),
         )
         // Rede de segurança para o caso (visto em campo, Android) de o Custom Tab
