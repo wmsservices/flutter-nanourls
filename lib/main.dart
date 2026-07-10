@@ -16,6 +16,7 @@ import 'screens/create_edit_url_screen.dart';
 import 'screens/url_info_screen.dart';
 import 'screens/sign_up_screen.dart';
 import 'screens/my_account_screen.dart';
+import 'screens/account_deleted_screen.dart';
 import 'screens/plans_screen.dart';
 import 'screens/forgot_pass_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -106,6 +107,7 @@ class MyApp extends StatelessWidget {
         '/url-info': (context) => const UrlInfoScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/account': (context) => const MyAccountScreen(),
+        '/account-deleted': (context) => const AccountDeletedScreen(),
         '/plans': (context) => const PlansScreen(),
         '/forgot-password': (context) => const ForgotPassScreen(),
         '/onboarding': (context) => const OnboardingScreen(),

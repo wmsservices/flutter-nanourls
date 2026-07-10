@@ -364,13 +364,9 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     try {
       await _apiService.deleteAccount();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n('delete_account_success_snackbar')),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-        Navigator.of(context).pushReplacementNamed('/login');
+        // Tela dedicada em vez do SnackBar antigo: dá espaço pro aviso de
+        // revogação do Sign In with Apple, que precisa de mais que uma linha
+        Navigator.of(context).pushNamedAndRemoveUntil('/account-deleted', (route) => false);
       }
     } catch (e) {
       if (mounted) {

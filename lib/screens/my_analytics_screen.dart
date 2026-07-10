@@ -218,9 +218,9 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
               children: [
                 _buildSelectorCard(data),
                 const SizedBox(height: 20.0),
-                _buildKpiGrid(data),
-                const SizedBox(height: 20.0),
                 _buildComparisonChartCard(data),
+                const SizedBox(height: 20.0),
+                _buildOverviewCard(data),
                 const SizedBox(height: 20.0),
                 _buildRankingCard(data),
                 const SizedBox(height: 20.0),
@@ -316,7 +316,32 @@ class _MyAnalyticsScreenState extends State<MyAnalyticsScreen> {
     );
   }
 
-  // ===== KPIs =====
+  // ===== Visão Geral (KPIs) =====
+  Widget _buildOverviewCard(MyAnalyticsDto data) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.dashboard, color: AppColors.primary, size: 18),
+                const SizedBox(width: 8.0),
+                Text(
+                  context.l10n('my_analytics_overview'),
+                  style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16.0),
+            _buildKpiGrid(data),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildKpiGrid(MyAnalyticsDto data) {
     return GridView.count(
       crossAxisCount: 2,

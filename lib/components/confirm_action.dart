@@ -44,6 +44,10 @@ class _ConfirmActionDialogState extends State<ConfirmActionDialog> {
     final resolvedConfirmText = widget.confirmText ?? context.l10n('confirm');
 
     return AlertDialog(
+      // Sem isso, o conteúdo não rola quando o teclado reduz o espaço vertical
+      // disponível (ou a fonte do sistema está maior) — ele só estoura por baixo
+      // do dialog em vez de virar scroll, como visto no campo de e-mail no S25 Ultra
+      scrollable: true,
       backgroundColor: AppColors.surface,
       surfaceTintColor: Colors.transparent,
       shape: RoundedRectangleBorder(
