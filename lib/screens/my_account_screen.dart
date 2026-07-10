@@ -341,8 +341,6 @@ class _MyAccountScreenState extends State<MyAccountScreen> {
     final user = _sessionManager.currentUser;
     if (user == null) return;
 
-    await _handleDeleteAccountFlow();
-
     final decryptedEmail = _getDecryptedEmail(user.email);
 
     final confirmed = await showDialog<dynamic>(

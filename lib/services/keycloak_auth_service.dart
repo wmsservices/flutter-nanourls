@@ -43,14 +43,32 @@ class KeycloakAuthService {
   // Abre a tela de login do Keycloak no navegador do sistema (Custom Tab / ASWebAuthenticationSession),
   // executa o Authorization Code Flow com PKCE e hidrata a sessão do app
   Future<User> login() async {
-    final AuthorizationTokenResponse response = await _appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        _clientId,
-        _redirectUrl,
-        discoveryUrl: _discoveryUrl,
-        scopes: _scopes,
-      ),
-    );
+    final AuthorizationTokenResponse response = await _appAuth
+        .authorizeAndExchangeCode(
+          AuthorizationTokenRequest(
+            _clientId,
+            _redirectUrl,
+            discoveryUrl: _discoveryUrl,
+            scopes: _scopes,
+            // Evita o redirect "silencioso" (sessão já existente no navegador do
+            // sistema): no Android, um retorno rápido demais do Custom Tab é
+            // interpretado erroneamente pelo AppAuth como cancelamento do usuário
+            // (race condition conhecida da lib nativa).
+            promptValues: const ['login'],
+          ),
+        )
+        // Rede de segurança para o caso (visto em campo, Android) de o Custom Tab
+        // nunca devolver o controle pro app depois do redirect do Keycloak: sem
+        // timeout, esse await fica pendente pra sempre e a tela de login trava
+        // num loading infinito. Com timeout, vira uma exceção normal, capturada
+        // pelo catch/finally de quem chama login() (login_screen/sign_up_screen),
+        // que já sabe recuperar o estado de loading e mostrar erro
+        .timeout(
+          const Duration(seconds: 90),
+          onTimeout: () => throw TimeoutException(
+            'Tempo esgotado aguardando o retorno do login SSO.',
+          ),
+        );
 
     await _applyTokenResponse(response);
     return _loadLocalUser();
