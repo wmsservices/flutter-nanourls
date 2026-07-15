@@ -280,6 +280,107 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (_providers.isNotEmpty) ...[
+                        // Botões sociais montados dinamicamente a partir dos provedores
+                        // ativos no Keycloak (Google, Apple, etc.), sem nada hardcoded aqui
+                        for (final provider in _providers)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: OutlinedButton.icon(
+                                onPressed: _loadingProviderAlias == null
+                                    ? () => _loginWithSso(provider.alias)
+                                    : null,
+                                icon: _loadingProviderAlias == provider.alias
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: AppColors.primary,
+                                          strokeWidth: 2.5,
+                                        ),
+                                      )
+                                    : FaIcon(
+                                        IdentityProviderIconHelper.getFaIconData(provider.alias),
+                                        color: AppColors.primary,
+                                        size: 20,
+                                      ),
+                                label: Text(
+                                  '${context.l10n('login_sso_button_prefix')} ${provider.displayName}',
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 12.0),
+
+                        // Aviso legal exibido só quando há botões de SSO social na tela
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            text: context.l10n('login_sso_consent_prefix'),
+                            style: const TextStyle(
+                              color: Colors.white38,
+                              fontSize: 12.0,
+                              fontFamily: 'SplineSans',
+                            ),
+                            children: [
+                              TextSpan(
+                                text: ' ${context.l10n('login_sso_consent_privacy_link')} ',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: _ssoPrivacyTapRecognizer,
+                              ),
+                              TextSpan(text: context.l10n('login_sso_consent_and')),
+                              TextSpan(
+                                text: ' ${context.l10n('login_sso_consent_terms_link')} ',
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: _ssoTermsTapRecognizer,
+                              ),
+                              TextSpan(text: context.l10n('login_sso_consent_suffix')),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20.0),
+
+                        // Divisor entre o SSO social e o login tradicional
+                        Row(
+                          children: [
+                            const Expanded(child: Divider(color: AppColors.border)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(
+                                context.l10n('login_sso_divider').toUpperCase(),
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11.0,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider(color: AppColors.border)),
+                          ],
+                        ),
+                        const SizedBox(height: 24.0),
+                      ],
+
                       Text(
                         context.l10n('email_label'),
                         style: const TextStyle(
@@ -439,110 +540,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               : Text(context.l10n('sign_in_btn')),
                         ),
                       ),
-                      if (_providers.isNotEmpty) ...[
-                        const SizedBox(height: 16.0),
-
-                        // Divisor entre o login tradicional e o SSO
-                        Row(
-                          children: [
-                            const Expanded(child: Divider(color: AppColors.border)),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                              child: Text(
-                                context.l10n('login_sso_divider').toUpperCase(),
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 11.0,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ),
-                            const Expanded(child: Divider(color: AppColors.border)),
-                          ],
-                        ),
-                        const SizedBox(height: 16.0),
-
-                        // Botões sociais montados dinamicamente a partir dos provedores
-                        // ativos no Keycloak (Google, Apple, etc.), sem nada hardcoded aqui
-                        for (final provider in _providers)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 52,
-                              child: OutlinedButton.icon(
-                                onPressed: _loadingProviderAlias == null
-                                    ? () => _loginWithSso(provider.alias)
-                                    : null,
-                                icon: _loadingProviderAlias == provider.alias
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          color: AppColors.primary,
-                                          strokeWidth: 2.5,
-                                        ),
-                                      )
-                                    : FaIcon(
-                                        IdentityProviderIconHelper.getFaIconData(provider.alias),
-                                        color: AppColors.primary,
-                                        size: 20,
-                                      ),
-                                label: Text(
-                                  '${context.l10n('login_sso_button_prefix')} ${provider.displayName}',
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                  ),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4)),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        const SizedBox(height: 12.0),
-
-                        // Aviso legal exibido só quando há botões de SSO social na tela
-                        RichText(
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            text: context.l10n('login_sso_consent_prefix'),
-                            style: const TextStyle(
-                              color: Colors.white38,
-                              fontSize: 12.0,
-                              fontFamily: 'SplineSans',
-                            ),
-                            children: [
-                              TextSpan(
-                                text: ' ${context.l10n('login_sso_consent_privacy_link')} ',
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: _ssoPrivacyTapRecognizer,
-                              ),
-                              TextSpan(text: context.l10n('login_sso_consent_and')),
-                              TextSpan(
-                                text: ' ${context.l10n('login_sso_consent_terms_link')} ',
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  decoration: TextDecoration.underline,
-                                ),
-                                recognizer: _ssoTermsTapRecognizer,
-                              ),
-                              TextSpan(text: context.l10n('login_sso_consent_suffix')),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12.0),
-                      ] else ...[
-                        const SizedBox(height: 24.0),
-                      ],
+                      const SizedBox(height: 24.0),
 
                       // Register / SignUp transition link
                       Center(

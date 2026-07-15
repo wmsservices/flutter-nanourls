@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../entities/plan.dart';
+import '../helpers/plan_helper.dart';
 import '../services/api_service.dart';
 import '../services/purchase_service.dart';
 import '../services/session_manager.dart';
@@ -155,7 +156,10 @@ class _PlansScreenState extends State<PlansScreen> {
   }
 
   // Confirmação para planos pagos no RevenueCat
-  Future<void> _confirmPurchase(Package package, String planName) async {
+  Future<void> _confirmPurchase(Package package, String planName, int targetPlanId) async {
+    final currentPlanId = _sessionManager.currentUser?.planId;
+    final isDowngrade = currentPlanId != null && PlanHelper.isPlanDowngrading(targetPlanId, currentPlanId);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -220,6 +224,10 @@ class _PlansScreenState extends State<PlansScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (isDowngrade) ...[
+                const SizedBox(height: 16),
+                _buildDowngradeWarning(),
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -270,6 +278,9 @@ class _PlansScreenState extends State<PlansScreen> {
 
   // Confirmação para alteração direta via API (plano gratuito)
   Future<void> _confirmChangePlanApi(Plan plan) async {
+    final currentPlanId = _sessionManager.currentUser?.planId;
+    final isDowngrade = currentPlanId != null && PlanHelper.isPlanDowngrading(plan.planId, currentPlanId);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -324,6 +335,10 @@ class _PlansScreenState extends State<PlansScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (isDowngrade) ...[
+                const SizedBox(height: 16),
+                _buildDowngradeWarning(),
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -440,31 +455,31 @@ class _PlansScreenState extends State<PlansScreen> {
                 : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Text(
                   context.l10n('Plans_Header_Title'),
                   style: const TextStyle(
-                    fontSize: 26,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     height: 1.2,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Text(
                     context.l10n('Plans_Header_Desc'),
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 13,
                       color: AppColors.textMuted,
-                      height: 1.4,
+                      height: 1.3,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 _buildBillingToggle(),
 
@@ -473,7 +488,7 @@ class _PlansScreenState extends State<PlansScreen> {
                 // Links legais fixos no cabeçalho (visíveis sem necessidade de scroll)
                 _buildLegalLinks(),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
                 Expanded(
                   child: SingleChildScrollView(
@@ -536,19 +551,19 @@ class _PlansScreenState extends State<PlansScreen> {
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(3.0),
       child: Row(
         children: [
           Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _billingCycle = 'monthly'),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
                   color: _billingCycle == 'monthly'
                       ? AppColors.primary.withValues(alpha: 0.15)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: BorderRadius.circular(24),
                   border: _billingCycle == 'monthly'
                       ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
                       : null,
@@ -559,6 +574,7 @@ class _PlansScreenState extends State<PlansScreen> {
                     style: TextStyle(
                       color: _billingCycle == 'monthly' ? AppColors.primary : AppColors.textMuted,
                       fontWeight: FontWeight.bold,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -569,12 +585,12 @@ class _PlansScreenState extends State<PlansScreen> {
             child: GestureDetector(
               onTap: () => setState(() => _billingCycle = 'yearly'),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 decoration: BoxDecoration(
                   color: _billingCycle == 'yearly'
                       ? AppColors.primary.withValues(alpha: 0.15)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(26),
+                  borderRadius: BorderRadius.circular(24),
                   border: _billingCycle == 'yearly'
                       ? Border.all(color: AppColors.primary.withValues(alpha: 0.3))
                       : null,
@@ -587,11 +603,12 @@ class _PlansScreenState extends State<PlansScreen> {
                       style: TextStyle(
                         color: _billingCycle == 'yearly' ? AppColors.primary : AppColors.textMuted,
                         fontWeight: FontWeight.bold,
+                        fontSize: 13,
                       ),
                     ),
                     const SizedBox(width: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(4),
@@ -601,7 +618,7 @@ class _PlansScreenState extends State<PlansScreen> {
                         '-20%',
                         style: TextStyle(
                           color: AppColors.primary,
-                          fontSize: 10,
+                          fontSize: 9,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -833,7 +850,8 @@ class _PlansScreenState extends State<PlansScreen> {
                   if (plan.package == 'free') {
                     _confirmChangePlanApi(plan);
                   } else if (activePkg != null) {
-                    _confirmPurchase(activePkg, plan.name);
+                    final targetPlanId = isYearlySelected ? (yearlyPlan?.planId ?? plan.planId) : plan.planId;
+                    _confirmPurchase(activePkg, plan.name, targetPlanId);
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -849,6 +867,44 @@ class _PlansScreenState extends State<PlansScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Alerta exibido no modal de confirmação quando o plano de destino é um downgrade
+  Widget _buildDowngradeWarning() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.redAccent.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  context.l10n('Plans_Downgrade_Modal_Title'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            context.l10n('Plans_Downgrade_Modal_Message'),
+            style: const TextStyle(color: Colors.white70, fontSize: 11, height: 1.4),
+          ),
+        ],
       ),
     );
   }
