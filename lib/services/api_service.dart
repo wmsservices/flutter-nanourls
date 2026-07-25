@@ -40,8 +40,12 @@ class ApiService {
     return headers;
   }
 
-  // Centraliza o tratamento das respostas da API, evitando repetição de try/catch em cada método
-  dynamic _handleResponse(http.Response response, {List<int> validStatus = const [200, 201, 204]}) {
+  // Centraliza o tratamento das respostas da API, evitando repetição de try/catch em cada método.
+  // clearSessionOn401: alguns endpoints (criar/editar NanoUrl) reaproveitam o status 401 também
+  // para rejeições de negócio (ex.: URL sinalizada pelo Safe Browsing), não só para token
+  // inválido/expirado — nesses casos o chamador desliga a limpeza de sessão para não deslogar
+  // o usuário por causa de uma URL recusada.
+  dynamic _handleResponse(http.Response response, {List<int> validStatus = const [200, 201, 204], bool clearSessionOn401 = true}) {
     if (validStatus.contains(response.statusCode)) {
       if (response.body.isEmpty) return null;
       try {
@@ -51,7 +55,7 @@ class ApiService {
       }
     }
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && clearSessionOn401) {
       _sessionManager.clearSession();
     }
 
@@ -267,7 +271,8 @@ class ApiService {
 
     try {
       final response = await http.put(url, headers: _buildHeaders(requiresAuth: true), body: jsonEncode(body));
-      _handleResponse(response);
+      // 401 aqui pode ser o backend recusando a URL de destino (Safe Browsing), não a sessão
+      _handleResponse(response, clearSessionOn401: false);
     } on SocketException {
       throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
     }
@@ -298,7 +303,8 @@ class ApiService {
 
     try {
       final response = await http.put(url, headers: _buildHeaders(requiresAuth: true), body: jsonEncode(body));
-      _handleResponse(response);
+      // 401 aqui pode ser o backend recusando a URL de destino (Safe Browsing), não a sessão
+      _handleResponse(response, clearSessionOn401: false);
     } on SocketException {
       throw const HttpException('Sem conexão com a internet. Verifique sua rede.');
     }
@@ -504,20 +510,32 @@ class ApiService {
     }
   }
 
-  // Tenta extrair uma mensagem de erro compreensível do retorno do servidor
+  // Tenta extrair uma mensagem de erro compreensível do retorno do servidor.
+  // Alguns endpoints (ex.: rejeição do Safe Browsing em save-nano/update-nano) devolvem o corpo
+  // como texto puro em vez do formato usual {"message": "..."}, então o parser cobre os dois casos.
   String _parseError(http.Response response, {String defaultMsg = 'Erro no servidor'}) {
-    try {
-      if (response.body.isNotEmpty) {
-        final data = jsonDecode(response.body);
-        final messageObj = data['message'];
+    final rawBody = response.body.trim();
+    if (rawBody.isEmpty) return '$defaultMsg (Status: ${response.statusCode})';
 
-        if (messageObj is String) return messageObj;
+    try {
+      final data = jsonDecode(rawBody);
+
+      if (data is String && data.isNotEmpty) return data;
+
+      if (data is Map) {
+        final messageObj = data['message'];
+        if (messageObj is String && messageObj.isNotEmpty) return messageObj;
         if (messageObj is Map) {
           if (messageObj['value'] is String) return messageObj['value'];
           if (messageObj['name'] is String) return messageObj['name'];
         }
       }
-    } catch (_) {}
+    } catch (_) {
+      // Corpo não é JSON válido — trata como texto puro vindo direto do servidor.
+      // Limite de tamanho evita refletir uma página de erro HTML/stack trace na tela do usuário.
+      if (rawBody.length < 300) return rawBody;
+    }
+
     return '$defaultMsg (Status: ${response.statusCode})';
   }
 }
